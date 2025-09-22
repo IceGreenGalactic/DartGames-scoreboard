@@ -18,6 +18,7 @@ export const game501Slice = (set, get) => ({
       turnStartScore: 501,
       finishedIds: [],
       podium: [],
+      lastBustAt: 0,
     });
   },
 
@@ -48,12 +49,14 @@ export const game501Slice = (set, get) => ({
 
     const lastThrow = t;
     const bust =
-      remain < 0 ||
-      remain === 1 ||
-      (remain === 0 && !isDoubleThrow(lastThrow));
+      remain < 0 || remain === 1 || (remain === 0 && !isDoubleThrow(lastThrow));
 
     if (bust) {
-      const nextPlayerIndex = nextAlivePlayerIndex(s.players, pIndex, finishedSet);
+      const nextPlayerIndex = nextAlivePlayerIndex(
+        s.players,
+        pIndex,
+        finishedSet
+      );
       const lastTurns = { ...s.lastTurns, [p.id]: [] };
       set({
         scores: { ...s.scores, [p.id]: startScore },
@@ -61,7 +64,8 @@ export const game501Slice = (set, get) => ({
         lastTurns,
         turn: { playerIndex: nextPlayerIndex, dartIndex: 0 },
         turnStartScore: get().scores[s.players[nextPlayerIndex].id],
-        history: [...s.history, prev],
+        history: [...s.history, prev].slice(-50),
+        lastBustAt: Date.now(),
       });
       return;
     }
@@ -75,7 +79,7 @@ export const game501Slice = (set, get) => ({
         status: "win_pending",
         winnerId: p.id,
         finishedAt: Date.now(),
-        history: [...s.history, prev],
+        history: [...s.history, prev].slice(-50),
       });
       return;
     }
@@ -91,13 +95,13 @@ export const game501Slice = (set, get) => ({
         lastTurns,
         turn: { playerIndex: nextPlayerIndex, dartIndex: 0 },
         turnStartScore: get().scores[s.players[nextPlayerIndex].id],
-        history: [...s.history, prev],
+        history: [...s.history, prev].slice(-50),
       });
     } else {
       set({
         currentThrows: newThrows,
         turn: { ...s.turn, dartIndex: nextDart },
-        history: [...s.history, prev],
+        history: [...s.history, prev].slice(-50),
       });
     }
   },

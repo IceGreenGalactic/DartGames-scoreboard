@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FaBullseye, FaUndo, FaBan } from "react-icons/fa";
 import { Grid, Key } from "./Keyboard.styled";
 
@@ -8,10 +8,19 @@ export function Keyboard({
   disabled,
   isDisabled,
   isBullDisabled,
+  bustTick,
 }) {
   const [modifier, setModifier] = useState(1);
+  const [bustFlash, setBustFlash] = useState(false);
   const clickGuardAt = useRef(0);
   const numbers = Array.from({ length: 20 }, (_, i) => i + 1);
+
+  useEffect(() => {
+    if (!bustTick) return;
+    setBustFlash(true);
+    const t = setTimeout(() => setBustFlash(false), 2050);
+    return () => clearTimeout(t);
+  }, [bustTick]);
 
   function guard(fn) {
     if (disabled) return;
@@ -55,7 +64,7 @@ export function Keyboard({
 
   return (
     <>
-      <Grid cols={7}>
+      <Grid cols={7} data-bust={bustFlash ? "true" : undefined}>
         {numbers.map((n) => {
           const blocked = isDisabled?.(n, modifier) ?? false;
           return (
