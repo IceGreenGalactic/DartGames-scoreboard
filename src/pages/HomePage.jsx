@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useTitle } from "../hooks/useTitle";
-import { useGameStore } from "../store/gameStore";
+import { useGameStore } from "../store";
 import {
   Title,
   Lead,

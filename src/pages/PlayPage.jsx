@@ -3,7 +3,7 @@ import { useTitle } from "../hooks/useTitle";
 import { Keyboard } from "../components/general/Keyboard";
 import { ScoreBoard } from "../components/general/ScoreBoard";
 import { Title } from "./PlayPage.styled";
-import { useGameStore } from "../store/gameStore";
+import { useGameStore } from "../store";
 
 export function PlayPage() {
   const { gameId } = useParams();

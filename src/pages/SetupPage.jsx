@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTitle } from "../hooks/useTitle";
 import { Title, Row, Actions } from "./SetupPage.styled";
-import { useGameStore } from "../store/gameStore";
+import { useGameStore } from "../store";
 
 export function SetupPage() {
   useTitle("DartGames • Setup");
