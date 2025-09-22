@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useTitle } from "../hooks/useTitle";
 import { useGameStore } from "../store";
+import { games } from "../constants/games";
 import {
   Title,
   Lead,
@@ -150,9 +151,11 @@ export function HomePage() {
           </StepHeader>
           <StepBody>
             <Games>
-              <GameBtn onClick={() => start("501")}>501</GameBtn>
-              <GameBtn onClick={() => start("killer")}>Killer (WIP)</GameBtn>
-              <GameBtn onClick={() => start("clock")}>Clock (WIP)</GameBtn>
+              {games.map((g) => (
+                <GameBtn key={g.id} onClick={() => start(g.id)}>
+                  {g.title}
+                </GameBtn>
+              ))}
             </Games>
             <Actions>
               <Link className="btn btn-outline-secondary" to="/setup">
