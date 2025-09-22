@@ -29,7 +29,13 @@ export function ScoreBoard({
   lastTurns,
   finished,
   winnerId,
+  podium = [],
 }) {
+  function placeOf(id) {
+    const i = podium.indexOf(id);
+    return i >= 0 ? i + 1 : null;
+  }
+
   return (
     <Board>
       <Cards>
@@ -37,14 +43,17 @@ export function ScoreBoard({
           const isActive = idx === activeIndex && !finished;
           const showThrows = isActive ? currentThrows : lastTurns[p.id] || [];
           const roundTotal = sumThrows(showThrows);
+          const place = placeOf(p.id);
+          const isWinner = place === 1;
+          const badgeText = place ? (place === 1 ? "Winner" : `${place}. place`) : null;
 
           return (
             <Card
               key={p.id}
               data-active={isActive}
-              data-winner={winnerId === p.id}
+              data-winner={isWinner}
             >
-              {winnerId === p.id && <Badge>Winner</Badge>}
+              {badgeText && <Badge>{badgeText}</Badge>}
               <Score>{scores[p.id] ?? 0}</Score>
               <Name>{p.name}</Name>
               <Boxes>

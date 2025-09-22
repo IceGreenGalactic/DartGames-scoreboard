@@ -2,7 +2,7 @@ import styled from "styled-components";
 
 export const Btn = styled.button`
   border: 0;
-  background: rgba(255, 255, 255, 0.08);
+  background:transparent;
   color: ${({ theme }) => theme.colors.text};
   border-radius: 10px;
   padding: 6px 10px;

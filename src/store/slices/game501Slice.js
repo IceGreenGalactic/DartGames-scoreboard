@@ -19,11 +19,18 @@ export const game501Slice = (set, get) => ({
       finishedIds: [],
       podium: [],
       lastBustAt: 0,
+      gameStartedAt: Date.now(),
+      gameFinishedAt: 0,
+      finishTimes: {},
     });
   },
 
   throwDart501({ value, mult }) {
-    const s = get();
+    let s = get();
+    if (s.status === "win_pending") {
+      get().continueForPlacements501();
+      s = get();
+    }
     if (s.status !== "in_progress") return;
 
     let pIndex = s.turn.playerIndex;
@@ -71,15 +78,18 @@ export const game501Slice = (set, get) => ({
     }
 
     if (remain === 0) {
+      const now = Date.now();
       const lastTurns = { ...s.lastTurns, [p.id]: newThrows };
+      const finishTimes = { ...s.finishTimes, [p.id]: now };
       set({
         scores: { ...s.scores, [p.id]: 0 },
         currentThrows: newThrows,
         lastTurns,
         status: "win_pending",
         winnerId: p.id,
-        finishedAt: Date.now(),
+        finishedAt: now,
         history: [...s.history, prev].slice(-50),
+        finishTimes,
       });
       return;
     }
@@ -87,7 +97,11 @@ export const game501Slice = (set, get) => ({
     const nextDart = s.turn.dartIndex + 1;
     if (nextDart >= 3) {
       const newScore = startScore - used;
-      const nextPlayerIndex = nextAlivePlayerIndex(s.players, pIndex, finishedSet);
+      const nextPlayerIndex = nextAlivePlayerIndex(
+        s.players,
+        pIndex,
+        finishedSet
+      );
       const lastTurns = { ...s.lastTurns, [p.id]: newThrows };
       set({
         scores: { ...s.scores, [p.id]: newScore },
@@ -113,24 +127,29 @@ export const game501Slice = (set, get) => ({
     const finished = new Set(s.finishedIds);
     if (!finished.has(s.winnerId)) finished.add(s.winnerId);
 
-    const podium = s.podium.includes(s.winnerId) ? s.podium : [...s.podium, s.winnerId];
+    const podium = s.podium.includes(s.winnerId)
+      ? s.podium
+      : [...s.podium, s.winnerId];
 
     const aliveCount = s.players.filter((p) => !finished.has(p.id)).length;
+
     if (aliveCount <= 1) {
-      const lastAlive = s.players.find((p) => !finished.has(p.id));
-      const finalPodium = lastAlive && !podium.includes(lastAlive.id)
-        ? [...podium, lastAlive.id]
-        : podium;
+      const now = Date.now();
       set({
         status: "finished",
-        winnerId: finalPodium[0] || s.winnerId,
-        podium: finalPodium,
+        winnerId: podium[0] || s.winnerId,
+        podium,
         currentThrows: [],
+        gameFinishedAt: now,
       });
       return;
     }
 
-    const nextIndex = nextAlivePlayerIndex(s.players, s.turn.playerIndex, finished);
+    const nextIndex = nextAlivePlayerIndex(
+      s.players,
+      s.turn.playerIndex,
+      finished
+    );
 
     set({
       finishedIds: Array.from(finished),

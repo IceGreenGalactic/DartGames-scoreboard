@@ -12,6 +12,9 @@ export const sessionSlice = (set, get) => ({
   finishedIds: [],
   podium: [],
   lastBustAt: 0,
+  gameStartedAt: 0,
+  gameFinishedAt: 0,
+  finishTimes: {},
 
   snapshot() {
     const s = get();
@@ -28,6 +31,9 @@ export const sessionSlice = (set, get) => ({
       turnStartScore: s.turnStartScore,
       finishedIds: s.finishedIds,
       podium: s.podium,
+      gameStartedAt: s.gameStartedAt,
+      gameFinishedAt: s.gameFinishedAt,
+      finishTimes: s.finishTimes,
     });
   },
 
@@ -46,6 +52,9 @@ export const sessionSlice = (set, get) => ({
       finishedIds: [],
       podium: [],
       lastBustAt: 0,
+      gameStartedAt: 0,
+      gameFinishedAt: 0,
+      finishTimes: {},
     });
   },
 
@@ -70,6 +79,9 @@ export const sessionSlice = (set, get) => ({
       turnStartScore: 0,
       finishedIds: [],
       podium: [],
+      gameStartedAt: Date.now(),
+      gameFinishedAt: 0,
+      finishTimes: {},
     });
   },
 
@@ -111,6 +123,37 @@ export const sessionSlice = (set, get) => ({
   continueForPlacements() {
     const type = get().gameType;
     if (type === "501") return get().continueForPlacements501();
+  },
+  finishGameNow() {
+    const s = get();
+    const now = Date.now();
+    const podium = Array.isArray(s.podium) ? s.podium.slice() : [];
+    const ft = { ...(s.finishTimes || {}) };
+
+    if (s.status === "win_pending" && s.winnerId) {
+      if (!podium.includes(s.winnerId)) {
+        podium.push(s.winnerId);
+      }
+      if (!ft[s.winnerId]) {
+        ft[s.winnerId] = now;
+      }
+      set({
+        status: "finished",
+        podium,
+        winnerId: podium[0] || s.winnerId,
+        gameFinishedAt: now,
+        currentThrows: [],
+        finishTimes: ft,
+      });
+      return;
+    }
+
+    set({
+      status: "finished",
+      gameFinishedAt: now,
+      winnerId: podium[0] || s.winnerId || null,
+      currentThrows: [],
+    });
   },
 
   undo() {
