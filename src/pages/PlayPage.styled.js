@@ -4,15 +4,20 @@ export const Title = styled.div`
   display: grid;
   gap: 6px;
   margin: 0 0 12px;
-  h1 { margin: 0; }
-  p { margin: 0; color: ${({ theme }) => theme.colors.muted}; }
+  h1 {
+    margin: 0;
+  }
+  p {
+    margin: 0;
+    color: ${({ theme }) => theme.colors.muted};
+  }
 `;
 
 export const ResultsCard = styled.div`
   margin-top: 12px;
   padding: 12px;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
 `;
 
@@ -35,7 +40,7 @@ export const ResultsList = styled.ol`
     gap: 8px;
     padding: 6px 8px;
     border-radius: 8px;
-    background: rgba(255,255,255,0.04);
+    background: rgba(255, 255, 255, 0.04);
   }
 `;
 
@@ -49,4 +54,29 @@ export const ResultsActions = styled.div`
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+`;
+
+export const HintArea = styled.div`
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  margin: 10px 0 4px;
+  justify-content: center;
+`;
+
+export const HintBar = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+`;
+
+export const HintSteps = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(61, 220, 151, 0.12);
+  border: 1px solid rgba(61, 220, 151, 0.35);
+  border-radius: 999px;
+  font-weight: 600;
 `;

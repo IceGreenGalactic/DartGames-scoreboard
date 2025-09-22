@@ -1,4 +1,4 @@
-import { isDoubleThrow, throwPoints, nextAlivePlayerIndex } from "../lib/501";
+import { isDoubleThrow, throwPoints, nextAlivePlayerIndex, findCheckout, formatRoute } from "../lib/501";
 
 export const game501Slice = (set, get) => ({
   startGame501() {
@@ -22,7 +22,14 @@ export const game501Slice = (set, get) => ({
       gameStartedAt: Date.now(),
       gameFinishedAt: 0,
       finishTimes: {},
+      checkoutHint: null,
     });
+    const s = get();
+    const p = s.players[0];
+    if (p) {
+      const routes = findCheckout(501, 3);
+      set({ checkoutHint: routes.length ? formatRoute(routes[0]) : null });
+    }
   },
 
   throwDart501({ value, mult }) {
@@ -65,14 +72,18 @@ export const game501Slice = (set, get) => ({
         finishedSet
       );
       const lastTurns = { ...s.lastTurns, [p.id]: [] };
+      const nextPlayer = s.players[nextPlayerIndex];
+      const nextStart = get().scores[nextPlayer.id];
+      const routesNext = findCheckout(nextStart, 3);
       set({
         scores: { ...s.scores, [p.id]: startScore },
         currentThrows: [],
         lastTurns,
         turn: { playerIndex: nextPlayerIndex, dartIndex: 0 },
-        turnStartScore: get().scores[s.players[nextPlayerIndex].id],
+        turnStartScore: nextStart,
         history: [...s.history, prev].slice(-50),
         lastBustAt: Date.now(),
+        checkoutHint: routesNext.length ? formatRoute(routesNext[0]) : null,
       });
       return;
     }
@@ -90,11 +101,15 @@ export const game501Slice = (set, get) => ({
         finishedAt: now,
         history: [...s.history, prev].slice(-50),
         finishTimes,
+        checkoutHint: null,
       });
       return;
     }
 
+    const dartsLeft = 3 - newThrows.length;
+    const routesNow = dartsLeft > 0 ? findCheckout(remain, dartsLeft) : [];
     const nextDart = s.turn.dartIndex + 1;
+
     if (nextDart >= 3) {
       const newScore = startScore - used;
       const nextPlayerIndex = nextAlivePlayerIndex(
@@ -103,19 +118,24 @@ export const game501Slice = (set, get) => ({
         finishedSet
       );
       const lastTurns = { ...s.lastTurns, [p.id]: newThrows };
+      const nextPlayer = s.players[nextPlayerIndex];
+      const nextStart = get().scores[nextPlayer.id];
+      const routesNext = findCheckout(nextStart, 3);
       set({
         scores: { ...s.scores, [p.id]: newScore },
         currentThrows: [],
         lastTurns,
         turn: { playerIndex: nextPlayerIndex, dartIndex: 0 },
-        turnStartScore: get().scores[s.players[nextPlayerIndex].id],
+        turnStartScore: nextStart,
         history: [...s.history, prev].slice(-50),
+        checkoutHint: routesNext.length ? formatRoute(routesNext[0]) : null,
       });
     } else {
       set({
         currentThrows: newThrows,
         turn: { ...s.turn, dartIndex: nextDart },
         history: [...s.history, prev].slice(-50),
+        checkoutHint: routesNow.length ? formatRoute(routesNow[0]) : null,
       });
     }
   },
@@ -132,7 +152,6 @@ export const game501Slice = (set, get) => ({
       : [...s.podium, s.winnerId];
 
     const aliveCount = s.players.filter((p) => !finished.has(p.id)).length;
-
     if (aliveCount <= 1) {
       const now = Date.now();
       set({
@@ -141,6 +160,7 @@ export const game501Slice = (set, get) => ({
         podium,
         currentThrows: [],
         gameFinishedAt: now,
+        checkoutHint: null,
       });
       return;
     }
@@ -150,6 +170,8 @@ export const game501Slice = (set, get) => ({
       s.turn.playerIndex,
       finished
     );
+    const nextStart = get().scores[s.players[nextIndex].id];
+    const routesNext = findCheckout(nextStart, 3);
 
     set({
       finishedIds: Array.from(finished),
@@ -158,7 +180,8 @@ export const game501Slice = (set, get) => ({
       winnerId: null,
       currentThrows: [],
       turn: { playerIndex: nextIndex, dartIndex: 0 },
-      turnStartScore: get().scores[s.players[nextIndex].id],
+      turnStartScore: nextStart,
+      checkoutHint: routesNext.length ? formatRoute(routesNext[0]) : null,
     });
   },
 });

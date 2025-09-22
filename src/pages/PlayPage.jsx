@@ -13,6 +13,7 @@ import {
 import { useGameStore } from "../store";
 import { rulesByGame } from "../components/rules";
 import { WinnerModal } from "../components/general/WinnerModal";
+import { HintBar, HintSteps, HintArea } from "./PlayPage.styled";
 
 function formatDuration(ms) {
   if (!ms || ms < 0) return "0s";
@@ -51,6 +52,7 @@ export function PlayPage() {
   const gameStartedAt = useGameStore((s) => s.gameStartedAt);
   const gameFinishedAt = useGameStore((s) => s.gameFinishedAt);
   const finishTimes = useGameStore((s) => s.finishTimes);
+  const checkoutHint = useGameStore((s) => s.checkoutHint);
 
   if (!players.length || gameType !== gameId) {
     return (
@@ -134,6 +136,15 @@ export function PlayPage() {
         winnerId={winnerId}
         podium={podium}
       />
+      <HintArea>
+        {Array.isArray(checkoutHint) && checkoutHint.length > 0 && (
+          <HintBar>
+            {checkoutHint.map((step, i) => (
+              <HintSteps key={i}>{step}</HintSteps>
+            ))}
+          </HintBar>
+        )}
+      </HintArea>
 
       <Keyboard
         onThrow={throwDart}

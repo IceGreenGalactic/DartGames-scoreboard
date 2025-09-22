@@ -15,6 +15,7 @@ export const sessionSlice = (set, get) => ({
   gameStartedAt: 0,
   gameFinishedAt: 0,
   finishTimes: {},
+  checkoutHint: null,
 
   snapshot() {
     const s = get();
@@ -34,6 +35,7 @@ export const sessionSlice = (set, get) => ({
       gameStartedAt: s.gameStartedAt,
       gameFinishedAt: s.gameFinishedAt,
       finishTimes: s.finishTimes,
+      checkoutHint: s.checkoutHint,
     });
   },
 
@@ -55,6 +57,7 @@ export const sessionSlice = (set, get) => ({
       gameStartedAt: 0,
       gameFinishedAt: 0,
       finishTimes: {},
+      checkoutHint: null,
     });
   },
 
@@ -82,6 +85,7 @@ export const sessionSlice = (set, get) => ({
       gameStartedAt: Date.now(),
       gameFinishedAt: 0,
       finishTimes: {},
+      checkoutHint: null,
     });
   },
 
@@ -124,6 +128,18 @@ export const sessionSlice = (set, get) => ({
     const type = get().gameType;
     if (type === "501") return get().continueForPlacements501();
   },
+
+  undo() {
+    const s = get();
+    const prev = s.history.at(-1);
+    if (!prev) return;
+    const state = JSON.parse(prev);
+    set({
+      ...state,
+      history: s.history.slice(0, -1),
+    });
+  },
+
   finishGameNow() {
     const s = get();
     const now = Date.now();
@@ -131,12 +147,8 @@ export const sessionSlice = (set, get) => ({
     const ft = { ...(s.finishTimes || {}) };
 
     if (s.status === "win_pending" && s.winnerId) {
-      if (!podium.includes(s.winnerId)) {
-        podium.push(s.winnerId);
-      }
-      if (!ft[s.winnerId]) {
-        ft[s.winnerId] = now;
-      }
+      if (!podium.includes(s.winnerId)) podium.push(s.winnerId);
+      if (!ft[s.winnerId]) ft[s.winnerId] = now;
       set({
         status: "finished",
         podium,
@@ -153,17 +165,6 @@ export const sessionSlice = (set, get) => ({
       gameFinishedAt: now,
       winnerId: podium[0] || s.winnerId || null,
       currentThrows: [],
-    });
-  },
-
-  undo() {
-    const s = get();
-    const prev = s.history.at(-1);
-    if (!prev) return;
-    const state = JSON.parse(prev);
-    set({
-      ...state,
-      history: s.history.slice(0, -1),
     });
   },
 });
