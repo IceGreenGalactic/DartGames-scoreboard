@@ -15,7 +15,10 @@ export const playersSlice = (set, get) => ({
     rp.add(name);
     const sel = new Set(get().selectedPlayers);
     sel.add(name);
-    set({ recentPlayers: Array.from(rp).slice(-100), selectedPlayers: Array.from(sel) });
+    set({
+      recentPlayers: Array.from(rp).slice(-100),
+      selectedPlayers: Array.from(sel),
+    });
   },
 
   removeSelected(name) {
@@ -27,13 +30,18 @@ export const playersSlice = (set, get) => ({
   },
 
   addToRecent(names) {
-    const setNames = new Set([...(get().recentPlayers || []), ...names.filter(Boolean)]);
+    const setNames = new Set([
+      ...(get().recentPlayers || []),
+      ...names.filter(Boolean),
+    ]);
     set({ recentPlayers: Array.from(setNames).slice(-100) });
   },
 
   setPlayersFromSelected() {
     const names = get().selectedPlayers;
-    const players = names.filter(Boolean).map((name) => ({ id: crypto.randomUUID(), name }));
+    const players = names
+      .filter(Boolean)
+      .map((name) => ({ id: crypto.randomUUID(), name }));
     set({ players });
   },
 
