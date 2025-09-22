@@ -1,0 +1,116 @@
+import { useRef, useState } from "react";
+import { FaBullseye, FaUndo, FaBan } from "react-icons/fa";
+import { Grid, Key } from "./Keyboard.styled";
+
+export function Keyboard({
+  onThrow,
+  onUndo,
+  disabled,
+  isDisabled,
+  isBullDisabled,
+}) {
+  const [modifier, setModifier] = useState(1);
+  const clickGuardAt = useRef(0);
+  const numbers = Array.from({ length: 20 }, (_, i) => i + 1);
+
+  function guard(fn) {
+    if (disabled) return;
+    const now = Date.now();
+    if (now - clickGuardAt.current < 200) return;
+    clickGuardAt.current = now;
+    fn();
+  }
+
+  function toggleModifier(next) {
+    setModifier((m) => (m === next ? 1 : next));
+  }
+
+  function sendNumber(n) {
+    guard(() => {
+      if (isDisabled?.(n, modifier)) return;
+      onThrow({ value: n, mult: modifier });
+      setModifier(1);
+    });
+  }
+
+  function sendBull() {
+    guard(() => {
+      if (isBullDisabled?.(modifier)) return;
+      const mult = modifier === 3 ? 1 : modifier;
+      onThrow({ value: 25, mult });
+      setModifier(1);
+    });
+  }
+
+  function miss() {
+    guard(() => {
+      onThrow({ value: 0, mult: 1 });
+      setModifier(1);
+    });
+  }
+
+  function doUndo() {
+    guard(() => onUndo());
+  }
+
+  return (
+    <>
+      <Grid cols={7}>
+        {numbers.map((n) => {
+          const blocked = isDisabled?.(n, modifier) ?? false;
+          return (
+            <Key
+              key={n}
+              disabled={disabled || blocked}
+              onClick={() => sendNumber(n)}
+            >
+              {n}
+            </Key>
+          );
+        })}
+
+        <Key
+          data-variant="bull"
+          disabled={disabled || (isBullDisabled?.(modifier) ?? false)}
+          onClick={sendBull}
+          title="Bull (25)"
+        >
+          <FaBullseye /> Bull
+        </Key>
+
+        <Key
+          data-variant="miss"
+          disabled={disabled}
+          onClick={miss}
+          title="Miss"
+        >
+          <FaBan /> Miss
+        </Key>
+
+        <Key
+          data-variant="double"
+          disabled={disabled}
+          onClick={() => toggleModifier(2)}
+          aria-pressed={modifier === 2}
+        >
+          Double
+        </Key>
+
+        <Key
+          data-variant="triple"
+          disabled={disabled}
+          onClick={() => toggleModifier(3)}
+          aria-pressed={modifier === 3}
+        >
+          Triple
+        </Key>
+
+        <Key data-variant="undo" onClick={doUndo} title="Undo">
+          <FaUndo /> Undo
+        </Key>
+      </Grid>
+
+      <Grid cols={3} />
+    </>
+  );
+}
