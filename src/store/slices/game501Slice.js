@@ -1,4 +1,10 @@
-import { isDoubleThrow, throwPoints, nextAlivePlayerIndex, findCheckout, formatRoute } from "../lib/501";
+import {
+  isDoubleThrow,
+  throwPoints,
+  nextAlivePlayerIndex,
+  findCheckout,
+  formatRoute,
+} from "../lib/501";
 
 export const game501Slice = (set, get) => ({
   startGame501() {

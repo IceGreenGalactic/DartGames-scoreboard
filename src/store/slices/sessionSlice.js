@@ -1,3 +1,5 @@
+import { shufflePlayers } from "../lib/turnOrder";
+
 export const sessionSlice = (set, get) => ({
   scores: {},
   gameType: null,
@@ -64,6 +66,9 @@ export const sessionSlice = (set, get) => ({
   startGame(gameId) {
     const s = get();
     if (!s.players.length) return;
+
+    const shuffled = shufflePlayers(s.players);
+    set({ players: shuffled });
 
     if (gameId === "501") {
       get().startGame501();
