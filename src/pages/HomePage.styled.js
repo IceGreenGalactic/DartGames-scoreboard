@@ -109,24 +109,28 @@ export const RecentWrap = styled.div`
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  gap: 20px;
 `;
 
-export const RecentChip = styled.button`
+export const RecentChip = styled.div`
   display: inline-flex;
   align-items: center;
   gap: 8px;
   padding: 8px 10px;
   border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
   color: inherit;
   font-weight: 600;
+  gap: 10px;
 
   &[data-active="true"] {
     outline: 2px solid ${({ theme }) => theme.colors.accent};
   }
 
-  .name { pointer-events: none; }
+  .name {
+    pointer-events: none;
+  }
 
   .actions {
     display: inline-flex;
@@ -135,19 +139,26 @@ export const RecentChip = styled.button`
 
   .iconbtn {
     border: 0;
-    background: rgba(255,255,255,0.08);
+    background: rgba(255, 255, 255, 0.08);
     color: inherit;
     border-radius: 8px;
     padding: 4px 6px;
     line-height: 1;
+    margin: 0px 2px;
   }
-  .iconbtn.ok { background: #1bb76e; color: #0b1419; }
-  .iconbtn.danger { background: #d32f2f; color: #fff; }
+  .iconbtn.ok {
+    background: #1bb76e;
+    color: #0b1419;
+  }
+  .iconbtn.danger {
+    background: #d32f2f;
+    color: #fff;
+  }
 
   .chip-input {
     border: 0;
     outline: none;
-    background: rgba(255,255,255,0.1);
+    background: rgba(255, 255, 255, 0.1);
     color: inherit;
     border-radius: 8px;
     padding: 4px 8px;
@@ -182,4 +193,3 @@ export const GameBtn = styled.button`
     outline: 2px solid ${({ theme }) => theme.colors.accent};
   }
 `;
-
