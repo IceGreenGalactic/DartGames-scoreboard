@@ -1,7 +1,14 @@
 import { createGlobalStyle } from "styled-components";
 
 export const GlobalStyles = createGlobalStyle`
-  :root { color-scheme: dark; }
+  :root {
+    color-scheme: dark;
+    --kb-h: 180px;
+  }
+  @media (orientation: landscape) and (max-height: 520px) {
+    :root { --kb-h: 120px; }
+  }
+
   * { box-sizing: border-box; }
   html, body, #root { height: 100%; }
   body {

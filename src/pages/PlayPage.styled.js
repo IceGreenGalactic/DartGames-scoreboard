@@ -57,26 +57,56 @@ export const ResultsActions = styled.div`
 `;
 
 export const HintArea = styled.div`
-  min-height: 48px;
+  margin: 8px 0 4px;
   display: flex;
-  align-items: center;
-  margin: 10px 0 4px;
   justify-content: center;
+  align-items: center;
+  min-height: 36px;
+
+  @media (max-width: 600px) {
+    min-height: 28px;
+    margin: 6px 0 2px;
+  }
+  @media (orientation: landscape) and (max-height: 520px) {
+    min-height: 24px;
+    margin: 4px 0 0;
+  }
 `;
 
 export const HintBar = styled.div`
   display: flex;
-  flex-wrap: wrap;
   gap: 8px;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 2px 0;
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+
+  @media (max-width: 600px) { gap: 6px; }
+  @media (orientation: landscape) and (max-height: 520px) { gap: 4px; }
 `;
 
 export const HintSteps = styled.span`
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
+  padding: 4px 10px;
   background: rgba(61, 220, 151, 0.12);
   border: 1px solid rgba(61, 220, 151, 0.35);
   border-radius: 999px;
   font-weight: 600;
+  font-size: 14px;
+  white-space: nowrap;
+
+  @media (max-width: 600px) {
+    font-size: 12px;
+    padding: 3px 8px;
+    gap: 4px;
+  }
+  @media (orientation: landscape) and (max-height: 520px) {
+    font-size: 11px;
+    padding: 2px 6px;
+    gap: 4px;
+  }
 `;

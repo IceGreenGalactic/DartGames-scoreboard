@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { FaBullseye, FaUndo, FaBan } from "react-icons/fa";
-import { Grid, Key } from "./Keyboard.styled";
+import { Grid, Key, ActionsRow, Wrap } from "./Keyboard.styled";
 
 export function Keyboard({
   onThrow,
@@ -25,7 +25,7 @@ export function Keyboard({
   function guard(fn) {
     if (disabled) return;
     const now = Date.now();
-    if (now - clickGuardAt.current < 200) return;
+    if (now - clickGuardAt.current < 160) return;
     clickGuardAt.current = now;
     fn();
   }
@@ -63,7 +63,7 @@ export function Keyboard({
   }
 
   return (
-    <>
+    <Wrap>
       <Grid cols={7} data-bust={bustFlash ? "true" : undefined}>
         {numbers.map((n) => {
           const blocked = isDisabled?.(n, modifier) ?? false;
@@ -77,7 +77,6 @@ export function Keyboard({
             </Key>
           );
         })}
-
         <Key
           data-variant="bull"
           disabled={disabled || (isBullDisabled?.(modifier) ?? false)}
@@ -86,7 +85,9 @@ export function Keyboard({
         >
           <FaBullseye /> Bull
         </Key>
+      </Grid>
 
+      <ActionsRow>
         <Key
           data-variant="miss"
           disabled={disabled}
@@ -101,6 +102,7 @@ export function Keyboard({
           disabled={disabled}
           onClick={() => toggleModifier(2)}
           aria-pressed={modifier === 2}
+          title="Double modifier"
         >
           Double
         </Key>
@@ -110,6 +112,7 @@ export function Keyboard({
           disabled={disabled}
           onClick={() => toggleModifier(3)}
           aria-pressed={modifier === 3}
+          title="Triple modifier"
         >
           Triple
         </Key>
@@ -117,9 +120,7 @@ export function Keyboard({
         <Key data-variant="undo" onClick={doUndo} title="Undo">
           <FaUndo /> Undo
         </Key>
-      </Grid>
-
-      <Grid cols={3} />
-    </>
+      </ActionsRow>
+    </Wrap>
   );
 }
