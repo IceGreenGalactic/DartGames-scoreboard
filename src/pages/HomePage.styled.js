@@ -112,14 +112,46 @@ export const RecentWrap = styled.div`
 `;
 
 export const RecentChip = styled.button`
-  border: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   padding: 8px 10px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-  color: ${({ theme }) => theme.colors.text};
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.04);
+  color: inherit;
+  font-weight: 600;
+
   &[data-active="true"] {
     outline: 2px solid ${({ theme }) => theme.colors.accent};
-    background: rgba(255, 255, 255, 0.14);
+  }
+
+  .name { pointer-events: none; }
+
+  .actions {
+    display: inline-flex;
+    gap: 4px;
+  }
+
+  .iconbtn {
+    border: 0;
+    background: rgba(255,255,255,0.08);
+    color: inherit;
+    border-radius: 8px;
+    padding: 4px 6px;
+    line-height: 1;
+  }
+  .iconbtn.ok { background: #1bb76e; color: #0b1419; }
+  .iconbtn.danger { background: #d32f2f; color: #fff; }
+
+  .chip-input {
+    border: 0;
+    outline: none;
+    background: rgba(255,255,255,0.1);
+    color: inherit;
+    border-radius: 8px;
+    padding: 4px 8px;
+    min-width: 120px;
   }
 `;
 
@@ -150,3 +182,4 @@ export const GameBtn = styled.button`
     outline: 2px solid ${({ theme }) => theme.colors.accent};
   }
 `;
+

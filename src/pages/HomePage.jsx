@@ -64,12 +64,10 @@ export function HomePage() {
     setEditing(name);
     setEditValue(name);
   }
-
   function cancelEdit() {
     setEditing(null);
     setEditValue("");
   }
-
   function saveEdit() {
     const v = editValue.trim();
     if (!editing || !v) {
@@ -79,11 +77,6 @@ export function HomePage() {
     renameRecent(editing, v);
     setEditing(null);
     setEditValue("");
-  }
-
-  function removeRecent(name) {
-    deleteRecent(name);
-    if (editing === name) cancelEdit();
   }
 
   return (
@@ -134,16 +127,84 @@ export function HomePage() {
               {recent
                 .slice(-50)
                 .reverse()
-                .map((n) => (
-                  <RecentChip
-                    key={n}
-                    data-active={selected.includes(n)}
-                    onClick={() => toggleSelect(n)}
-                    title={selected.includes(n) ? "Remove" : "Add"}
-                  >
-                    {n}
-                  </RecentChip>
-                ))}
+                .map((n) => {
+                  const isActive = selected.includes(n);
+                  const isEditing = editing === n;
+                  return (
+                    <RecentChip
+                      key={n}
+                      data-active={isActive}
+                      onClick={() => !isEditing && toggleSelect(n)}
+                      title={isActive ? "Remove" : "Add"}
+                    >
+                      {isEditing ? (
+                        <>
+                          <input
+                            className="chip-input"
+                            value={editValue}
+                            onChange={(e) => setEditValue(e.target.value)}
+                            onClick={(e) => e.stopPropagation()}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") saveEdit();
+                              if (e.key === "Escape") cancelEdit();
+                            }}
+                            autoFocus
+                          />
+                          <div className="actions">
+                            <button
+                              className="iconbtn ok"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                saveEdit();
+                              }}
+                              aria-label="Save"
+                            >
+                              ✓
+                            </button>
+                            <button
+                              className="iconbtn"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                cancelEdit();
+                              }}
+                              aria-label="Cancel"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <span className="name">{n}</span>
+                          <div className="actions">
+                            <button
+                              className="iconbtn"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                beginEdit(n);
+                              }}
+                              aria-label="Edit"
+                              title="Edit"
+                            >
+                              ✎
+                            </button>
+                            <button
+                              className="iconbtn danger"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                deleteRecent(n);
+                              }}
+                              aria-label="Delete"
+                              title="Delete"
+                            >
+                              🗑
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </RecentChip>
+                  );
+                })}
               {recent.length === 0 && <span>No recent players yet</span>}
             </RecentWrap>
 
@@ -171,73 +232,6 @@ export function HomePage() {
                 Add
               </button>
             </AddRow>
-
-            <Divider />
-
-            <div style={{ display: "grid", gap: 8 }}>
-              <strong>Manage players</strong>
-              <div style={{ display: "grid", gap: 6 }}>
-                {recent.length === 0 && <span>No saved players</span>}
-                {recent.map((n) =>
-                  editing === n ? (
-                    <div
-                      key={n}
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: "1fr auto auto",
-                        gap: 8,
-                        alignItems: "center",
-                      }}
-                    >
-                      <input
-                        className="form-control"
-                        value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") saveEdit();
-                          if (e.key === "Escape") cancelEdit();
-                        }}
-                        autoFocus
-                      />
-                      <button className="btn btn-primary" onClick={saveEdit}>
-                        Save
-                      </button>
-                      <button className="btn btn-outline-secondary" onClick={cancelEdit}>
-                        Cancel
-                      </button>
-                    </div>
-                  ) : (
-                    <div
-                      key={n}
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: "1fr auto auto",
-                        gap: 8,
-                        alignItems: "center",
-                        padding: "6px 8px",
-                        borderRadius: 8,
-                        background: "rgba(255,255,255,0.04)",
-                        border: "1px solid rgba(255,255,255,0.08)",
-                      }}
-                    >
-                      <span>{n}</span>
-                      <button
-                        className="btn btn-outline-light"
-                        onClick={() => beginEdit(n)}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        className="btn btn-outline-secondary"
-                        onClick={() => removeRecent(n)}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  )
-                )}
-              </div>
-            </div>
           </StepBody>
         </Step>
 
@@ -249,7 +243,6 @@ export function HomePage() {
               <StepSub>Games will use the selected players.</StepSub>
             </div>
           </StepHeader>
-
           <StepBody>
             <Games>
               {games.map((g) => (
