@@ -1,17 +1,29 @@
 import styled from "styled-components";
 
-export const Title = styled.h1`
-  margin: 0 0 16px;
+export const Wrap = styled.div`
+  display: grid;
+  gap: 12px;
 `;
 
-export const Row = styled.div`
-  display: flex;
-  gap: 8px;
-  margin-bottom: 8px;
+export const Title = styled.h1`
+  margin: 0;
+`;
+
+export const Lead = styled.p`
+  margin: 0 0 8px;
+  color: ${({ theme }) => theme.colors.muted};
 `;
 
 export const Actions = styled.div`
   display: flex;
   gap: 8px;
-  margin-top: 12px;
+  flex-wrap: wrap;
+`;
+
+export const Stat = styled.div`
+  margin-top: 8px;
+  display: grid;
+  gap: 4px;
+  color: ${({ theme }) => theme.colors.muted};
+  font-size: 14px;
 `;
