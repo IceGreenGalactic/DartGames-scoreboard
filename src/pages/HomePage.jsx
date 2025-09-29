@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useTitle } from "../hooks/useTitle";
 import { useGameStore } from "../store";
 import { games } from "../constants/games";
+import { KillerSetupModal } from "../components/games/killer/KillerSetupModal";
 import {
   Title,
   Lead,
@@ -48,10 +49,15 @@ export function HomePage() {
   const [newName, setNewName] = useState("");
   const [editing, setEditing] = useState(null);
   const [editValue, setEditValue] = useState("");
+  const [killerOpen, setKillerOpen] = useState(false);
 
   function start(gameId) {
     if (selected.length < 1) {
       alert("Select at least one player");
+      return;
+    }
+    if (gameId === "killer") {
+      setKillerOpen(true);
       return;
     }
     addToRecent(selected);
@@ -259,6 +265,17 @@ export function HomePage() {
           </StepBody>
         </Step>
       </StepsRow>
+
+      <KillerSetupModal
+        isOpen={killerOpen}
+        onClose={() => setKillerOpen(false)}
+        onConfirm={(names, numbers) => {
+          addToRecent(names);
+          startGame("killer", names, numbers);
+          setKillerOpen(false);
+          nav("/play/killer");
+        }}
+      />
     </PageWrap>
   );
 }

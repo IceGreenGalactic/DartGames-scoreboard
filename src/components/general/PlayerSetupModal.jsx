@@ -11,9 +11,9 @@ import {
   Pills,
   Small,
 } from "./PlayerSetupModal.styled";
-import { useGameStore } from "../../store/gameStore";
+import { useGameStore } from "../../store";
 
-export function PlayerSetupModal({ isOpen, onClose, onConfirm }) {
+export function PlayerSetupModal({ isOpen, onClose, onConfirm, gameId }) {
   const recent = useGameStore((s) => s.recentPlayers);
   const addToRecent = useGameStore((s) => s.addToRecent);
   const [step, setStep] = useState(1);
@@ -29,11 +29,12 @@ export function PlayerSetupModal({ isOpen, onClose, onConfirm }) {
   }, [isOpen]);
 
   useEffect(() => {
-    if (step === 2)
+    if (step === 2) {
       setNames(Array.from({ length: count }, (_, i) => names[i] || ""));
+    }
   }, [step, count]);
 
-  const canConfirm = useMemo(
+  const canConfirmNames = useMemo(
     () => names.filter(Boolean).length === count,
     [names, count]
   );
@@ -43,14 +44,14 @@ export function PlayerSetupModal({ isOpen, onClose, onConfirm }) {
   return (
     <Backdrop onClick={onClose}>
       <ModalCard onClick={(e) => e.stopPropagation()}>
-        <Title>Start 501</Title>
+        <Title>Start {gameId?.toUpperCase?.()}</Title>
 
         {step === 1 && (
           <>
             <Section>
               <label>Number of players</label>
               <Grid>
-                {[1, 2, 3, 4, 5, 6].map((n) => (
+                {[2, 3, 4, 5, 6].map((n) => (
                   <button
                     key={n}
                     className={`btn ${
@@ -134,13 +135,13 @@ export function PlayerSetupModal({ isOpen, onClose, onConfirm }) {
               </button>
               <button
                 className="btn btn-success"
-                disabled={!canConfirm}
+                disabled={!canConfirmNames}
                 onClick={() => {
                   addToRecent(names);
                   onConfirm(names);
                 }}
               >
-                Start
+                Start Game
               </button>
             </Actions>
           </>

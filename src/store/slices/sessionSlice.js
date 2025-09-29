@@ -43,7 +43,8 @@ export const sessionSlice = (set, get) => ({
     });
   },
 
-  resetGame() {
+  resetGame(preservePlayers = false) {
+    const s = get();
     set({
       scores: {},
       gameType: null,
@@ -63,21 +64,29 @@ export const sessionSlice = (set, get) => ({
       finishTimes: {},
       checkoutHint: null,
       hasLoggedSession: false,
+      players: preservePlayers ? s.players : [],
     });
   },
 
-  startGame(gameId) {
+  startGame(gameId, names, numbers, options) {
     const s = get();
-    if (!s.players.length) return;
-
-    const shuffled = shufflePlayers(s.players);
-    set({ players: shuffled });
 
     if (gameId === "501") {
       get().startGame501();
       set({ hasLoggedSession: false });
       return;
     }
+
+    if (gameId === "killer") {
+      get().startGameKiller(names, numbers, options);
+      set({ hasLoggedSession: false });
+      return;
+    }
+
+    if (!s.players?.length) return;
+
+    const shuffled = shufflePlayers(s.players);
+    set({ players: shuffled });
 
     set({
       gameType: gameId,
@@ -102,6 +111,7 @@ export const sessionSlice = (set, get) => ({
   throwDart(payload) {
     const type = get().gameType;
     if (type === "501") return get().throwDart501(payload);
+    if (type === "killer") return get().throwDartKiller(payload);
 
     const s = get();
     if (s.status !== "in_progress") return;

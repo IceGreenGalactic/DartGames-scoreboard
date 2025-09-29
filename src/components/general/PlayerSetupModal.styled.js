@@ -75,3 +75,28 @@ export const Small = styled.div`
   color: ${({ theme }) => theme.colors.muted};
   font-size: 12px;
 `;
+
+export const ToggleRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0;
+`;
+
+export const ToggleInput = styled.input``;
+
+export const ToggleLabel = styled.label`
+  color: ${({ theme }) => theme.colors.text};
+  font-size: 14px;
+`;
+
+//killer
+export const PlayerRow = styled.div`
+  display: flex;
+  gap: 8px;
+  margin-bottom: 6px;
+`;
+
+export const PlayerName = styled.span`
+  min-width: 80px;
+`;

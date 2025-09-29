@@ -1,7 +1,10 @@
+import { useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { useTitle } from "../hooks/useTitle";
 import { Keyboard } from "../components/general/Keyboard";
 import { ScoreBoard } from "../components/general/ScoreBoard";
+import { KillerScoreBoard } from "../components/games/killer/ScoreboardKiller";
+import { KillerSetupModal } from "../components/games/killer/KillerSetupModal";
 import {
   Title,
   ResultsCard,
@@ -9,11 +12,13 @@ import {
   ResultsList,
   ResultsActions,
   ResultMeta,
+  HintBar,
+  HintSteps,
+  HintArea,
 } from "./PlayPage.styled";
 import { useGameStore } from "../store";
 import { rulesByGame } from "../components/rules";
 import { WinnerModal } from "../components/general/WinnerModal";
-import { HintBar, HintSteps, HintArea } from "./PlayPage.styled";
 
 function formatDuration(ms) {
   if (!ms || ms < 0) return "0s";
@@ -31,6 +36,8 @@ function formatDuration(ms) {
 export function PlayPage() {
   const { gameId } = useParams();
   const nav = useNavigate();
+  const [showKillerSetup, setShowKillerSetup] = useState(false);
+
   useTitle(`DartGames • ${gameId?.toUpperCase?.() ?? "Play"}`);
 
   const players = useGameStore((s) => s.players);
@@ -41,8 +48,6 @@ export function PlayPage() {
   const status = useGameStore((s) => s.status);
   const winnerId = useGameStore((s) => s.winnerId);
   const gameType = useGameStore((s) => s.gameType);
-  const throwDart = useGameStore((s) => s.throwDart);
-  const undo = useGameStore((s) => s.undo);
   const continueForPlacements = useGameStore((s) => s.continueForPlacements);
   const resetGame = useGameStore((s) => s.resetGame);
   const lastBustAt = useGameStore((s) => s.lastBustAt);
@@ -53,8 +58,21 @@ export function PlayPage() {
   const gameFinishedAt = useGameStore((s) => s.gameFinishedAt);
   const finishTimes = useGameStore((s) => s.finishTimes);
   const checkoutHint = useGameStore((s) => s.checkoutHint);
+  const finishGameNow = useGameStore((s) => s.finishGameNow);
 
-  if (!players.length || gameType !== gameId) {
+  const throwDart =
+    gameId === "killer"
+      ? useGameStore((s) => s.throwDartKiller)
+      : useGameStore((s) => s.throwDart);
+
+  const undo =
+    gameId === "killer"
+      ? useGameStore((s) => s.undoKiller)
+      : useGameStore((s) => s.undo);
+
+  const allowKillerSetupView = gameId === "killer" && showKillerSetup;
+
+  if ((!players.length || gameType !== gameId) && !allowKillerSetupView) {
     return (
       <>
         <Title>
@@ -71,13 +89,14 @@ export function PlayPage() {
   const currentPlayer = players[turn.playerIndex];
   const winner = players.find((p) => p.id === winnerId);
   const RulesComp = rulesByGame[gameId] || null;
-  const finishGameNow = useGameStore((s) => s.finishGameNow);
 
   const canThrow = status === "in_progress" || status === "win_pending";
   const currentPlace = (podium?.length || 0) + 1;
   const remainingAfterWinner = players.length - (finishedIds.length + 1);
   const canContinuePlacements =
-    status === "win_pending" && remainingAfterWinner > 1;
+    gameId === "killer"
+      ? false
+      : status === "win_pending" && remainingAfterWinner > 1;
   const nextPlace = currentPlace + 1;
 
   const podiumEntries = (podium || []).map((id, i) => {
@@ -109,7 +128,7 @@ export function PlayPage() {
         completed: false,
       };
     })
-    .sort((a, b) => a.score - b.score || a.name.localeCompare(b.name));
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <>
@@ -125,17 +144,27 @@ export function PlayPage() {
         </p>
       </Title>
 
-      <ScoreBoard
-        currentPlayerId={currentPlayer?.id}
-        currentThrows={currentThrows}
-        players={players}
-        activeIndex={turn.playerIndex}
-        scores={scores}
-        lastTurns={lastTurns}
-        finished={status === "finished"}
-        winnerId={winnerId}
-        podium={podium}
-      />
+      {gameId === "killer" ? (
+        <KillerScoreBoard
+          players={players}
+          currentPlayerId={currentPlayer?.id}
+          currentThrows={currentThrows}
+          lastTurns={lastTurns}
+        />
+      ) : (
+        <ScoreBoard
+          currentPlayerId={currentPlayer?.id}
+          currentThrows={currentThrows}
+          players={players}
+          activeIndex={turn.playerIndex}
+          scores={scores}
+          lastTurns={lastTurns}
+          finished={status === "finished"}
+          winnerId={winnerId}
+          podium={podium}
+        />
+      )}
+
       <HintArea>
         {Array.isArray(checkoutHint) && checkoutHint.length > 0 && (
           <HintBar>
@@ -178,8 +207,13 @@ export function PlayPage() {
             <button
               className="btn btn-outline-light"
               onClick={() => {
-                resetGame();
-                startGame(gameId);
+                if (gameId === "killer") {
+                  resetGame(true);
+                  setShowKillerSetup(true);
+                } else {
+                  resetGame();
+                  startGame(gameId);
+                }
               }}
             >
               Play again
@@ -214,6 +248,17 @@ export function PlayPage() {
           nav("/");
         }}
       />
+
+      {gameId === "killer" && (
+        <KillerSetupModal
+          isOpen={showKillerSetup}
+          onClose={() => setShowKillerSetup(false)}
+          onConfirm={(names, numbers, options) => {
+            startGame("killer", names, numbers, options);
+            setShowKillerSetup(false);
+          }}
+        />
+      )}
     </>
   );
 }
