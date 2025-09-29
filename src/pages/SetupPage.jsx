@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
 import { useTitle } from "../hooks/useTitle";
 import { useGameStore } from "../store";
-import { Wrap, Title, Lead, Actions, Stat } from "./SetupPage.styled";
+import { Wrap, Title, Lead, Actions, Stat, Row } from "./SetupPage.styled";
+import { ThemePicker } from "../components/general/ThemePicker";
 
 export function SetupPage() {
   useTitle("DartGames • Setup");
@@ -14,11 +15,18 @@ export function SetupPage() {
       <Title>Setup</Title>
       <Lead>Vedlikehold og raske handlinger.</Lead>
 
+      <Row>
+        <ThemePicker />
+      </Row>
+
       <Actions>
-        <button className="btn btn-primary" onClick={() => window.location.reload()}>
+        <button
+          className="btn btn-primary"
+          onClick={() => window.location.reload()}
+        >
           Oppdater app
         </button>
-        <button className="btn btn-outline-warning" onClick={resetGame}>
+        <button className="btn btn-outline-danger" onClick={resetGame}>
           Clear game state
         </button>
         <Link className="btn btn-outline-secondary" to="/">

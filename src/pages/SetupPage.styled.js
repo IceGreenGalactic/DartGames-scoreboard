@@ -14,6 +14,12 @@ export const Lead = styled.p`
   color: ${({ theme }) => theme.colors.muted};
 `;
 
+export const Row = styled.div`
+  display: flex;
+  gap: 8px;
+  align-items: center;
+`;
+
 export const Actions = styled.div`
   display: flex;
   gap: 8px;
