@@ -18,6 +18,7 @@ export const sessionSlice = (set, get) => ({
   gameFinishedAt: 0,
   finishTimes: {},
   checkoutHint: null,
+  hasLoggedSession: false,
 
   snapshot() {
     const s = get();
@@ -38,6 +39,7 @@ export const sessionSlice = (set, get) => ({
       gameFinishedAt: s.gameFinishedAt,
       finishTimes: s.finishTimes,
       checkoutHint: s.checkoutHint,
+      hasLoggedSession: s.hasLoggedSession,
     });
   },
 
@@ -60,6 +62,7 @@ export const sessionSlice = (set, get) => ({
       gameFinishedAt: 0,
       finishTimes: {},
       checkoutHint: null,
+      hasLoggedSession: false,
     });
   },
 
@@ -72,6 +75,7 @@ export const sessionSlice = (set, get) => ({
 
     if (gameId === "501") {
       get().startGame501();
+      set({ hasLoggedSession: false });
       return;
     }
 
@@ -91,6 +95,7 @@ export const sessionSlice = (set, get) => ({
       gameFinishedAt: 0,
       finishTimes: {},
       checkoutHint: null,
+      hasLoggedSession: false,
     });
   },
 
@@ -131,6 +136,10 @@ export const sessionSlice = (set, get) => ({
 
   continueForPlacements() {
     const type = get().gameType;
+    const s = get();
+    if (!s.hasLoggedSession && s.winnerId) {
+      get().finalizeWinner(s.winnerId);
+    }
     if (type === "501") return get().continueForPlacements501();
   },
 
@@ -145,31 +154,56 @@ export const sessionSlice = (set, get) => ({
     });
   },
 
-  finishGameNow() {
+  finalizeWinner(winnerId) {
     const s = get();
     const now = Date.now();
     const podium = Array.isArray(s.podium) ? s.podium.slice() : [];
+    if (winnerId && !podium.includes(winnerId)) podium.push(winnerId);
     const ft = { ...(s.finishTimes || {}) };
-
-    if (s.status === "win_pending" && s.winnerId) {
-      if (!podium.includes(s.winnerId)) podium.push(s.winnerId);
-      if (!ft[s.winnerId]) ft[s.winnerId] = now;
-      set({
-        status: "finished",
-        podium,
-        winnerId: podium[0] || s.winnerId,
-        gameFinishedAt: now,
-        currentThrows: [],
-        finishTimes: ft,
-      });
-      return;
-    }
+    if (winnerId && !ft[winnerId]) ft[winnerId] = now;
 
     set({
+      status: "win_pending",
+      winnerId: winnerId || s.winnerId || null,
+      finishedAt: now,
+      podium,
+      finishTimes: ft,
+    });
+
+    const g = get();
+    if (podium.length === 1 && !g.hasLoggedSession && g.addSession) {
+      const w = g.players.find((p) => p.id === (winnerId || g.winnerId));
+      const payload = {
+        id: crypto.randomUUID(),
+        game: g.gameType,
+        date: new Date().toISOString(),
+        players: g.players.map((x) => x.name),
+        winner: w ? w.name : null,
+      };
+      g.addSession(payload);
+      set({ hasLoggedSession: true });
+    }
+  },
+
+  finishGameNow() {
+    const s = get();
+    if (!s.hasLoggedSession) {
+      const firstWinnerId = s.podium[0] || s.winnerId || null;
+      if (firstWinnerId) get().finalizeWinner(firstWinnerId);
+    }
+    const now = Date.now();
+    const s2 = get();
+    set({
       status: "finished",
+      winnerId: s2.winnerId || s2.podium[0] || null,
+      podium: Array.isArray(s2.podium)
+        ? s2.podium.slice()
+        : s2.winnerId
+        ? [s2.winnerId]
+        : [],
       gameFinishedAt: now,
-      winnerId: podium[0] || s.winnerId || null,
       currentThrows: [],
+      finishTimes: { ...(s2.finishTimes || {}) },
     });
   },
 });

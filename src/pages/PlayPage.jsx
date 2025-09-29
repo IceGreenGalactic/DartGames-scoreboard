@@ -206,7 +206,13 @@ export function PlayPage() {
         canContinue={canContinuePlacements}
         onContinue={continueForPlacements}
         onFinish={finishGameNow}
-        onExit={() => nav("/")}
+        onExit={() => {
+          const g = useGameStore.getState();
+          if (!g.hasLoggedSession && g.winnerId) {
+            g.finalizeWinner(g.winnerId);
+          }
+          nav("/");
+        }}
       />
     </>
   );

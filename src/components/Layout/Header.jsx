@@ -1,6 +1,5 @@
 import { NavLink } from "react-router-dom";
 import { Bar, HeaderInner, Brand, Nav } from "./Layout.styled";
-import { StatsButton } from "../general/StatsButton";
 
 export function Header() {
   return (
@@ -12,7 +11,7 @@ export function Header() {
             Home
           </NavLink>
           <NavLink to="/setup">Setup</NavLink>
-          <StatsButton />
+          <NavLink to="/stats">Stats</NavLink>
         </Nav>
       </HeaderInner>
     </Bar>

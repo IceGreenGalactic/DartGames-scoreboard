@@ -3,6 +3,7 @@ import { persist, createJSONStorage } from "zustand/middleware";
 import { playersSlice } from "./slices/playersSlice";
 import { sessionSlice } from "./slices/sessionSlice";
 import { game501Slice } from "./slices/game501Slice";
+import { statsSlice } from "./slices/statsSlice";
 import { themeSlice } from "./slices/themeSlice";
 
 export const useGameStore = create(
@@ -11,6 +12,7 @@ export const useGameStore = create(
       ...playersSlice(set, get, api),
       ...sessionSlice(set, get, api),
       ...game501Slice(set, get, api),
+      ...statsSlice(set, get, api),
       ...themeSlice(set, get, api),
     }),
     {
@@ -27,6 +29,8 @@ export const useGameStore = create(
         finishedAt: s.finishedAt,
         recentPlayers: s.recentPlayers,
         selectedPlayers: s.selectedPlayers,
+        sessions: s.sessions,
+        stats: s.stats,
         theme: s.theme,
       }),
       version: 3,
