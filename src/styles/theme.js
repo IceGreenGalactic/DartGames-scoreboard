@@ -1,6 +1,6 @@
-import bubblegum from "@/assets/images/bubblegum.png";
-import glacier from "@/assets/images/glacier.png";
-import luxe from "@/assets/images/Luxe.png";
+import bubblegum from "../assets/images/bubblegum.png";
+import glacier from "../assets/images/glacier.png";
+import luxe from "../assets/images/Luxe.png";
 
 const space = (n) => `${4 * n}px`;
 
