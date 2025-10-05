@@ -1,3 +1,7 @@
+import bubblegum from "@/assets/images/bubblegum.png";
+import glacier from "@/assets/images/glacier.png";
+import luxe from "@/assets/images/Luxe.png";
+
 const space = (n) => `${4 * n}px`;
 
 export const themes = {
@@ -25,7 +29,7 @@ export const themes = {
       text: "#c10679ff",
       muted: "#d0548bff",
     },
-    bgImage: "/src/assets/images/bubblegum.png",
+    bgImage: bubblegum,
     fontFamily:
       "'Lilita One', system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
     radii: { lg: "18px" },
@@ -93,7 +97,7 @@ export const themes = {
       text: "#e6f7ff",
       muted: "#9ec0d9",
     },
-    bgImage: "/src/assets/images/glacier.png",
+    bgImage: glacier,
     fontFamily:
       "'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
     radii: { lg: "14px" },
@@ -110,7 +114,7 @@ export const themes = {
       text: "#fff3c4",
       muted: "#d9c68a",
     },
-    bgImage: "/src/assets/images/luxe.png",
+    bgImage: luxe,
     fontFamily:
       "'Cinzel', system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
     radii: { lg: "16px" },
