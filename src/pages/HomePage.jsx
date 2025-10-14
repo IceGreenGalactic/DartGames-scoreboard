@@ -269,9 +269,9 @@ export function HomePage() {
       <KillerSetupModal
         isOpen={killerOpen}
         onClose={() => setKillerOpen(false)}
-        onConfirm={(names, numbers) => {
+        onConfirm={(names, numbers, options) => {
           addToRecent(names);
-          startGame("killer", names, numbers);
+          startGame("killer", names, numbers, options);
           setKillerOpen(false);
           nav("/play/killer");
         }}
