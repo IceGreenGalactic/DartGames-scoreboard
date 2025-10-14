@@ -1,6 +1,12 @@
-import bubblegum from "../assets/images/bubblegum.png";
 import glacier from "../assets/images/glacier.png";
 import luxe from "../assets/images/Luxe.png";
+import nebula from "../assets/images/nebula.png";
+import saloon from "../assets/images/saloon.png";
+import disney from "../assets/images/disney.png";
+import neonPink from "../assets/images/neonpink.png";
+import pulse from "../assets/images/pulse.png";
+import inferno from "../assets/images/inferno.png";
+import bullseye from "../assets/images/bullseye.png";
 
 const space = (n) => `${4 * n}px`;
 
@@ -20,18 +26,18 @@ export const themes = {
   },
 
   pink: {
-    name: "Bubblegum",
+    name: "Neon Pink",
     colors: {
-      bg: "#2a1a22",
-      panel: "rgba(58, 34, 48, 0.92)",
-      accent: "#ff5fa2",
-      danger: "#ff6b6b",
-      text: "#c10679ff",
-      muted: "#d0548bff",
+      bg: "#140017",
+      panel: "rgba(45, 0, 58, 0.9)",
+      accent: "#ff4fa3",
+      danger: "#ff2d55",
+      text: "#ffe6f7",
+      muted: "#d88bbd",
     },
-    bgImage: bubblegum,
+    bgImage: neonPink,
     fontFamily:
-      "'Lilita One', system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
+      "'Audiowide', system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
     radii: { lg: "18px" },
     spacing: space,
   },
@@ -46,7 +52,7 @@ export const themes = {
       text: "#e8f0ff",
       muted: "#aab6ff",
     },
-    bgImage: "/src/assets/images/disney.png",
+    bgImage: disney,
     fontFamily:
       "'Mouse Memoirs', system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
     radii: { lg: "20px" },
@@ -63,27 +69,44 @@ export const themes = {
       text: "#efe9ff",
       muted: "#b8a7d9",
     },
-    bgImage: "/src/assets/images/nebula.png",
+    bgImage: nebula,
     fontFamily:
-      "'Orbitron', system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
+      "'Oxanium', system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
     radii: { lg: "8px" },
     spacing: space,
   },
 
-  green: {
-    name: "Pitch",
+  pulse: {
+    name: "Pulse",
     colors: {
-      bg: "#0f1612",
-      panel: "rgba(24, 36, 28, 0.92)",
-      accent: "#32cd32",
-      danger: "#e63946",
-      text: "#e7f5e7",
-      muted: "#a3b6a3",
+      bg: "#081018",
+      panel: "rgba(10, 24, 36, 0.9)",
+      accent: "#20f0ff",
+      danger: "#ff4d6d",
+      text: "#dff6ff",
+      muted: "#8bb6c9",
     },
-    bgImage: "/src/assets/images/pitch.png",
+    bgImage: pulse,
     fontFamily:
-      "'Rajdhani', system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
+      "'Exo 2', system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
     radii: { lg: "12px" },
+    spacing: space,
+  },
+
+  inferno: {
+    name: "Inferno",
+    colors: {
+      bg: "#180b0a",
+      panel: "rgba(42, 16, 12, 0.9)",
+      accent: "#ff7a1a",
+      danger: "#ff3b30",
+      text: "#ffe8d9",
+      muted: "#e2b39a",
+    },
+    bgImage: inferno,
+    fontFamily:
+      "'Almendra SC', system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
+    radii: { lg: "14px" },
     spacing: space,
   },
 
@@ -99,7 +122,7 @@ export const themes = {
     },
     bgImage: glacier,
     fontFamily:
-      "'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
+      "'Jura', system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
     radii: { lg: "14px" },
     spacing: space,
   },
@@ -131,7 +154,7 @@ export const themes = {
       text: "#f5e6d3",
       muted: "#d5c1a6",
     },
-    bgImage: "/src/assets/images/saloon.png",
+    bgImage: saloon,
     fontFamily: "'Rye', system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
     radii: { lg: "10px" },
     spacing: space,
@@ -147,7 +170,7 @@ export const themes = {
       text: "#f1f5f9",
       muted: "#b8c2cc",
     },
-    bgImage: "/src/assets/images/bullseye.png",
+    bgImage: bullseye,
     fontFamily:
       "'Oswald', system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
     radii: { lg: "4px" },
