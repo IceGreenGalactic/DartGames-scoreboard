@@ -24,6 +24,10 @@ export const Actions = styled.div`
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  .muted {
+    color: ${({ theme }) => theme.colors.muted};
+    border: 1px solid ${({ theme }) => theme.colors.muted};
+  }
 `;
 
 export const Stat = styled.div`

@@ -29,7 +29,7 @@ export function SetupPage() {
         <button className="btn btn-outline-danger" onClick={resetGame}>
           Clear game state
         </button>
-        <Link className="btn btn-outline-secondary" to="/">
+        <Link className="btn muted" to="/">
           Til forsiden
         </Link>
       </Actions>
