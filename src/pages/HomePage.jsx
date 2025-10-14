@@ -97,7 +97,7 @@ export function HomePage() {
           <Link className="btn btn-primary" to={`/play/${gameType || "501"}`}>
             Resume {gameType?.toUpperCase?.() || "GAME"}
           </Link>
-          <button className="btn btn-outline-secondary" onClick={resetGame}>
+          <button className="btn muted" onClick={resetGame}>
             Clear game
           </button>
         </Row>
