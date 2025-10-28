@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { useTitle } from "../hooks/useTitle";
+import { useTitle, getDisplayTitle } from "../hooks/useTitle";
 import { useGameStore } from "../store";
 import { games } from "../constants/games";
 import { KillerSetupModal } from "../components/games/killer/KillerSetupModal";
@@ -28,7 +28,7 @@ import {
 } from "./HomePage.styled";
 
 export function HomePage() {
-  useTitle("DartGames • Home");
+  useTitle("Home");
   const nav = useNavigate();
 
   const status = useGameStore((s) => s.status);
@@ -92,10 +92,10 @@ export function HomePage() {
         <Lead>Pick players, then choose a game.</Lead>
       </div>
 
-      {status === "in_progress" && (
+      {status === "in_progress" && gameType && (
         <Row>
-          <Link className="btn btn-primary" to={`/play/${gameType || "501"}`}>
-            Resume {gameType?.toUpperCase?.() || "GAME"}
+          <Link className="btn btn-primary" to={`/play/${gameType}`}>
+             Resume {games.find((g) => g.id === gameType)?.title || gameType?.toUpperCase?.()}
           </Link>
           <button className="btn muted" onClick={resetGame}>
             Clear game

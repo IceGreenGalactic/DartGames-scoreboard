@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { useTitle } from "../hooks/useTitle";
+import { games } from "../constants/games";
 import { Keyboard } from "../components/general/Keyboard";
 import { ScoreBoard } from "../components/general/ScoreBoard";
 import { KillerScoreBoard } from "../components/games/killer/ScoreboardKiller";
@@ -39,7 +40,7 @@ export function PlayPage() {
   const nav = useNavigate();
   const [showKillerSetup, setShowKillerSetup] = useState(false);
 
-  useTitle(`DartGames • ${gameId?.toUpperCase?.() ?? "Play"}`);
+  useTitle(gameId);
 
   const players = useGameStore((s) => s.players);
   const scores = useGameStore((s) => s.scores);
@@ -78,7 +79,10 @@ export function PlayPage() {
     return (
       <>
         <Title>
-          <h1>{gameId?.toUpperCase?.()}</h1>
+          <h1>
+            {games.find((g) => g.id === gameId)?.title ||
+              gameId?.toUpperCase?.()}
+          </h1>
         </Title>
         <p>No active game. Go to Home to select players and start.</p>
         <Link className="btn btn-primary" to="/">
@@ -136,7 +140,11 @@ export function PlayPage() {
     <>
       <Title>
         <div>
-          <h1>{gameId?.toUpperCase?.()}</h1>
+          <h1>
+            {games.find((g) => g.id === gameId)?.title ||
+              gameId?.toUpperCase?.()}
+          </h1>
+
           <div>{RulesComp && <RulesComp />}</div>
         </div>
         <p>
