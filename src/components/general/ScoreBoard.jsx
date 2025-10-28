@@ -9,7 +9,7 @@ import {
   RoundSum,
   Badge,
 } from "./ScoreBoard.styled";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useLayoutEffect } from "react";
 
 function sumThrow(t) {
   if (!t) return 0;
@@ -53,19 +53,32 @@ export function ScoreBoard({
     window.matchMedia("(orientation: landscape) and (max-height: 520px)")
       .matches;
 
-  useEffect(() => {
-    if (!activeRef.current) return;
+  let orderedPlayers = [...players];
+  let didReorder = false;
+
+  if (shouldBiasActiveToBottom && !finished && players[activeIndex]) {
+    const active = players[activeIndex];
+    didReorder = true;
+    orderedPlayers = players.filter((p) => p.id !== active.id).concat(active);
+  }
+
+  useLayoutEffect(() => {
+    if (!didReorder || !activeRef.current) return;
     activeRef.current.scrollIntoView({
-      behavior: "smooth",
-      block: shouldBiasActiveToBottom ? "end" : "nearest",
+      behavior: "auto",
+      block: "end",
+      inline: "nearest",
     });
   }, [currentPlayerId, shouldBiasActiveToBottom]);
 
-  let orderedPlayers = [...players];
-  if (shouldBiasActiveToBottom && !finished && players[activeIndex]) {
-    const active = players[activeIndex];
-    orderedPlayers = players.filter((p) => p.id !== active.id).concat(active);
-  }
+  useEffect(() => {
+    if (didReorder || !activeRef.current) return;
+    activeRef.current.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "nearest",
+    });
+  }, [currentPlayerId, shouldBiasActiveToBottom]);
 
   return (
     <Board>
