@@ -17,6 +17,7 @@ import {
   HintBar,
   HintSteps,
   HintArea,
+  DoubleOutSwitch,
 } from "./PlayPage.styled";
 import { useGameStore } from "../store";
 import { rulesByGame } from "../components/rules";
@@ -62,6 +63,8 @@ export function PlayPage() {
   const checkoutHint = useGameStore((s) => s.checkoutHint);
   const finishGameNow = useGameStore((s) => s.finishGameNow);
   const targetsClock = useGameStore((s) => s.targetsClock);
+  const mustDoubleOut = useGameStore((s) => s.mustDoubleOut);
+  const toggleDoubleOut = useGameStore((s) => s.toggleDoubleOut);
 
   const throwDart =
     gameId === "killer"
@@ -280,6 +283,21 @@ export function PlayPage() {
             setShowKillerSetup(false);
           }}
         />
+      )}
+      {(gameId === "501" || gameId === "301") && (
+        <DoubleOutSwitch className="form-check form-switch">
+          <input
+            className="form-check-input"
+            type="checkbox"
+            role="switch"
+            id="doubleout"
+            checked={!!mustDoubleOut}
+            onChange={toggleDoubleOut}
+          />
+          <label className="form-check-label" htmlFor="doubleout">
+            Require double-out
+          </label>
+        </DoubleOutSwitch>
       )}
     </>
   );

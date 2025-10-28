@@ -29,6 +29,7 @@ export const game501Slice = (set, get) => ({
       gameFinishedAt: 0,
       finishTimes: {},
       checkoutHint: null,
+      mustDoubleOut: true,
     });
     const s = get();
     const p = s.players[0];
@@ -38,7 +39,6 @@ export const game501Slice = (set, get) => ({
     }
   },
 
-  
   startGame301() {
     const players = get().players;
     const scores = {};
@@ -61,6 +61,7 @@ export const game501Slice = (set, get) => ({
       gameFinishedAt: 0,
       finishTimes: {},
       checkoutHint: null,
+      mustDoubleOut: true,
     });
     const s = get();
     const p = s.players[0];
@@ -100,8 +101,11 @@ export const game501Slice = (set, get) => ({
     const remain = startScore - used;
 
     const lastThrow = t;
+    const mustDouble = !!s.mustDoubleOut;
     const bust =
-      remain < 0 || remain === 1 || (remain === 0 && !isDoubleThrow(lastThrow));
+      remain < 0 ||
+      (mustDouble && remain === 1) ||
+      (mustDouble && remain === 0 && !isDoubleThrow(lastThrow));
 
     if (bust) {
       const nextPlayerIndex = nextAlivePlayerIndex(
@@ -112,7 +116,8 @@ export const game501Slice = (set, get) => ({
       const lastTurns = { ...s.lastTurns, [p.id]: [] };
       const nextPlayer = s.players[nextPlayerIndex];
       const nextStart = get().scores[nextPlayer.id];
-      const routesNext = findCheckout(nextStart, 3);
+      const routesNext =
+        mustDouble && nextStart > 1 ? findCheckout(nextStart, 3) : [];
       set({
         scores: { ...s.scores, [p.id]: startScore },
         currentThrows: [],
@@ -145,7 +150,10 @@ export const game501Slice = (set, get) => ({
     }
 
     const dartsLeft = 3 - newThrows.length;
-    const routesNow = dartsLeft > 0 ? findCheckout(remain, dartsLeft) : [];
+    const routesNow =
+      mustDouble && dartsLeft > 0 && remain > 1
+        ? findCheckout(remain, dartsLeft)
+        : [];
     const nextDart = s.turn.dartIndex + 1;
 
     if (nextDart >= 3) {
@@ -158,7 +166,8 @@ export const game501Slice = (set, get) => ({
       const lastTurns = { ...s.lastTurns, [p.id]: newThrows };
       const nextPlayer = s.players[nextPlayerIndex];
       const nextStart = get().scores[nextPlayer.id];
-      const routesNext = findCheckout(nextStart, 3);
+      const routesNext =
+        mustDouble && nextStart > 1 ? findCheckout(nextStart, 3) : [];
       set({
         scores: { ...s.scores, [p.id]: newScore },
         currentThrows: [],
@@ -211,7 +220,9 @@ export const game501Slice = (set, get) => ({
       finished
     );
     const nextStart = get().scores[s.players[nextIndex].id];
-    const routesNext = findCheckout(nextStart, 3);
+    const mustDouble = !!s.mustDoubleOut;
+    const routesNext =
+      mustDouble && nextStart > 1 ? findCheckout(nextStart, 3) : [];
 
     set({
       finishedIds: Array.from(finished),

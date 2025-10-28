@@ -19,6 +19,7 @@ export const sessionSlice = (set, get) => ({
   finishTimes: {},
   checkoutHint: null,
   hasLoggedSession: false,
+  mustDoubleOut: null,
 
   snapshot() {
     const s = get();
@@ -41,6 +42,7 @@ export const sessionSlice = (set, get) => ({
       checkoutHint: s.checkoutHint,
       hasLoggedSession: s.hasLoggedSession,
       targetsClock: s.targetsClock,
+      mustDoubleOut: s.mustDoubleOut,
     });
   },
 
@@ -66,6 +68,7 @@ export const sessionSlice = (set, get) => ({
       checkoutHint: null,
       hasLoggedSession: false,
       players: preservePlayers ? s.players : [],
+      mustDoubleOut: null,
     });
   },
 
@@ -235,6 +238,13 @@ export const sessionSlice = (set, get) => ({
       gameFinishedAt: now,
       currentThrows: [],
       finishTimes: { ...(s2.finishTimes || {}) },
+    });
+  },
+  toggleDoubleOut() {
+    const s = get();
+    set({
+      mustDoubleOut: !s.mustDoubleOut,
+      checkoutHint: null,
     });
   },
 });

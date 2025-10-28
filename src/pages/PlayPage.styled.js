@@ -81,10 +81,16 @@ export const HintBar = styled.div`
   -webkit-overflow-scrolling: touch;
   padding: 2px 0;
   scrollbar-width: none;
-  &::-webkit-scrollbar { display: none; }
+  &::-webkit-scrollbar {
+    display: none;
+  }
 
-  @media (max-width: 600px) { gap: 6px; }
-  @media (orientation: landscape) and (max-height: 520px) { gap: 4px; }
+  @media (max-width: 600px) {
+    gap: 6px;
+  }
+  @media (orientation: landscape) and (max-height: 520px) {
+    gap: 4px;
+  }
 `;
 
 export const HintSteps = styled.span`
@@ -108,5 +114,27 @@ export const HintSteps = styled.span`
     font-size: 11px;
     padding: 2px 6px;
     gap: 4px;
+  }
+`;
+
+export const DoubleOutSwitch = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  margin: 16px 0 8px;
+  opacity: 0.9;
+
+  .form-check-input {
+    cursor: pointer;
+    width: 2.6em;
+    height: 1.4em;
+  }
+
+  .form-check-label {
+    font-weight: 600;
+    user-select: none;
+    color: ${({ theme }) => theme.colors.text};
   }
 `;
