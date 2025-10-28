@@ -38,6 +38,38 @@ export const game501Slice = (set, get) => ({
     }
   },
 
+  
+  startGame301() {
+    const players = get().players;
+    const scores = {};
+    players.forEach((p) => (scores[p.id] = 301));
+    set({
+      scores,
+      gameType: "301",
+      turn: { playerIndex: 0, dartIndex: 0 },
+      currentThrows: [],
+      lastTurns: {},
+      status: "in_progress",
+      winnerId: null,
+      finishedAt: null,
+      history: [],
+      turnStartScore: 301,
+      finishedIds: [],
+      podium: [],
+      lastBustAt: 0,
+      gameStartedAt: Date.now(),
+      gameFinishedAt: 0,
+      finishTimes: {},
+      checkoutHint: null,
+    });
+    const s = get();
+    const p = s.players[0];
+    if (p) {
+      const routes = findCheckout(301, 3);
+      set({ checkoutHint: routes.length ? formatRoute(routes[0]) : null });
+    }
+  },
+
   throwDart501({ value, mult }) {
     let s = get();
     if (s.status === "win_pending") {

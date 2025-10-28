@@ -80,7 +80,13 @@ export const sessionSlice = (set, get) => ({
       set({ hasLoggedSession: false });
       return;
     }
-
+    if (gameId === "301") {
+      const shuffled = shufflePlayers(s.players);
+      set({ players: shuffled });
+      get().startGame301();
+      set({ hasLoggedSession: false });
+      return;
+    }
     if (gameId === "killer") {
       const shuffled = shufflePlayers(s.players);
       set({ players: shuffled });
@@ -95,7 +101,6 @@ export const sessionSlice = (set, get) => ({
       set({ hasLoggedSession: false });
       return;
     }
-
 
     const shuffled = shufflePlayers(s.players);
     set({ players: shuffled });
@@ -122,7 +127,8 @@ export const sessionSlice = (set, get) => ({
 
   throwDart(payload) {
     const type = get().gameType;
-    if (type === "501") return get().throwDart501(payload);
+
+    if (type === "501" || type === "301") return get().throwDart501(payload);
     if (type === "killer") return get().throwDartKiller(payload);
     if (type === "clock") return get().throwDartClock(payload);
 
@@ -163,7 +169,8 @@ export const sessionSlice = (set, get) => ({
     if (!s.hasLoggedSession && s.winnerId) {
       get().finalizeWinner(s.winnerId);
     }
-    if (type === "501") return get().continueForPlacements501();
+    if (type === "501" || type === "301")
+      return get().continueForPlacements501();
     if (type === "clock") return get().continueForPlacementsClock();
   },
 
