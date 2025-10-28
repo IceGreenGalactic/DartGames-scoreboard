@@ -137,7 +137,9 @@ export const game501Slice = (set, get) => ({
         checkoutHint: routesNext.length ? formatRoute(routesNext[0]) : null,
       });
     } else {
+      const newPartialScore = startScore - used;
       set({
+        scores: { ...s.scores, [p.id]: newPartialScore },
         currentThrows: newThrows,
         turn: { ...s.turn, dartIndex: nextDart },
         history: [...s.history, prev].slice(-50),
