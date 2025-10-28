@@ -5,6 +5,7 @@ import { Keyboard } from "../components/general/Keyboard";
 import { ScoreBoard } from "../components/general/ScoreBoard";
 import { KillerScoreBoard } from "../components/games/killer/ScoreboardKiller";
 import { KillerSetupModal } from "../components/games/killer/KillerSetupModal";
+import { ClockScoreBoard } from "../components/games/clock/ScoreboardClock";
 import {
   Title,
   ResultsCard,
@@ -59,6 +60,7 @@ export function PlayPage() {
   const finishTimes = useGameStore((s) => s.finishTimes);
   const checkoutHint = useGameStore((s) => s.checkoutHint);
   const finishGameNow = useGameStore((s) => s.finishGameNow);
+  const targetsClock = useGameStore((s) => s.targetsClock);
 
   const throwDart =
     gameId === "killer"
@@ -151,6 +153,18 @@ export function PlayPage() {
           currentThrows={currentThrows}
           lastTurns={lastTurns}
         />
+      ) : gameId === "clock" ? (
+        <ClockScoreBoard
+          currentPlayerId={currentPlayer?.id}
+          currentThrows={currentThrows}
+          players={players}
+          activeIndex={turn.playerIndex}
+          scores={scores}
+          lastTurns={lastTurns}
+          finished={status === "finished"}
+          winnerId={winnerId}
+          podium={podium}
+        />
       ) : (
         <ScoreBoard
           currentPlayerId={currentPlayer?.id}
@@ -211,7 +225,7 @@ export function PlayPage() {
                   resetGame(true);
                   setShowKillerSetup(true);
                 } else {
-                  resetGame();
+                  resetGame(true);
                   startGame(gameId);
                 }
               }}

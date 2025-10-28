@@ -4,6 +4,7 @@ import { playersSlice } from "./slices/playersSlice";
 import { sessionSlice } from "./slices/sessionSlice";
 import { game501Slice } from "./slices/game501Slice";
 import { gameKillerSlice } from "./slices/gameKillerSlice";
+import { gameClockSlice } from "./slices/gameClockSlice";
 import { statsSlice } from "./slices/statsSlice";
 import { themeSlice } from "./slices/themeSlice";
 
@@ -13,7 +14,8 @@ export const useGameStore = create(
       ...playersSlice(set, get, api),
       ...sessionSlice(set, get, api),
       ...game501Slice(set, get, api),
-      ...gameKillerSlice(set, get),
+      ...gameKillerSlice(set, get, api),
+      ...gameClockSlice(set, get, api),
       ...statsSlice(set, get, api),
       ...themeSlice(set, get, api),
     }),
@@ -34,8 +36,9 @@ export const useGameStore = create(
         sessions: s.sessions,
         stats: s.stats,
         theme: s.theme,
+        clock: s.clock,
       }),
-      version: 3,
+      version: 4,
     }
   )
 );

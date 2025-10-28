@@ -40,6 +40,7 @@ export const sessionSlice = (set, get) => ({
       finishTimes: s.finishTimes,
       checkoutHint: s.checkoutHint,
       hasLoggedSession: s.hasLoggedSession,
+      targetsClock: s.targetsClock,
     });
   },
 
@@ -70,20 +71,31 @@ export const sessionSlice = (set, get) => ({
 
   startGame(gameId, names, numbers, options) {
     const s = get();
+    if (!s.players?.length) return;
 
     if (gameId === "501") {
+      const shuffled = shufflePlayers(s.players);
+      set({ players: shuffled });
       get().startGame501();
       set({ hasLoggedSession: false });
       return;
     }
 
     if (gameId === "killer") {
+      const shuffled = shufflePlayers(s.players);
+      set({ players: shuffled });
       get().startGameKiller(names, numbers, options);
       set({ hasLoggedSession: false });
       return;
     }
+    if (gameId === "clock") {
+      const shuffled = shufflePlayers(s.players);
+      set({ players: shuffled });
+      get().startGameClock();
+      set({ hasLoggedSession: false });
+      return;
+    }
 
-    if (!s.players?.length) return;
 
     const shuffled = shufflePlayers(s.players);
     set({ players: shuffled });
@@ -112,6 +124,7 @@ export const sessionSlice = (set, get) => ({
     const type = get().gameType;
     if (type === "501") return get().throwDart501(payload);
     if (type === "killer") return get().throwDartKiller(payload);
+    if (type === "clock") return get().throwDartClock(payload);
 
     const s = get();
     if (s.status !== "in_progress") return;
@@ -151,6 +164,7 @@ export const sessionSlice = (set, get) => ({
       get().finalizeWinner(s.winnerId);
     }
     if (type === "501") return get().continueForPlacements501();
+    if (type === "clock") return get().continueForPlacementsClock();
   },
 
   undo() {
