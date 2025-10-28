@@ -123,7 +123,7 @@ export const RoundSum = styled.div`
   font-size: 14px;
 
   @media (max-width: 900px) {
-    min-height: 6px;
+    min-height: 16px;
     font-size: 12px;
     margin-top: 2px;
   }
@@ -132,6 +132,7 @@ export const RoundSum = styled.div`
     justify-self: start;
     margin: 0;
     font-size: 12px;
+     min-height: 18px;
   }
 `;
 

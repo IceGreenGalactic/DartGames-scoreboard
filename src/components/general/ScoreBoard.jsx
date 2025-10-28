@@ -9,6 +9,7 @@ import {
   RoundSum,
   Badge,
 } from "./ScoreBoard.styled";
+import { useEffect, useRef } from "react";
 
 function sumThrow(t) {
   if (!t) return 0;
@@ -44,15 +45,23 @@ export function ScoreBoard({
     return i >= 0 ? i + 1 : null;
   }
 
-  const isSmall =
-    typeof window !== "undefined" &&
-    (window.matchMedia("(max-width: 900px)").matches ||
-      window.matchMedia("(orientation: landscape) and (max-height: 520px)")
-        .matches);
+  const activeRef = useRef(null);
 
-  // On smaler devices make current player move next to keyboard
+  const shouldBiasActiveToBottom =
+    typeof window !== "undefined" &&
+    window.matchMedia("(orientation: landscape) and (max-height: 520px)")
+      .matches;
+
+  useEffect(() => {
+    if (!activeRef.current) return;
+    activeRef.current.scrollIntoView({
+      behavior: "smooth",
+      block: shouldBiasActiveToBottom ? "end" : "nearest",
+    });
+  }, [currentPlayerId, shouldBiasActiveToBottom]);
+
   let orderedPlayers = [...players];
-  if (isSmall && !finished && players[activeIndex]) {
+  if (shouldBiasActiveToBottom && !finished && players[activeIndex]) {
     const active = players[activeIndex];
     orderedPlayers = players.filter((p) => p.id !== active.id).concat(active);
   }
@@ -70,7 +79,12 @@ export function ScoreBoard({
             place && (place === 1 ? "Winner" : `${place}. place`);
 
           return (
-            <Card key={p.id} data-active={isActive} data-winner={isWinner}>
+            <Card
+              key={p.id}
+              data-active={isActive}
+              data-winner={isWinner}
+              ref={isActive ? activeRef : null}
+            >
               {badgeText && <Badge>{badgeText}</Badge>}
               <Score>{scores[p.id] ?? 0}</Score>
               <Name>{p.name}</Name>
