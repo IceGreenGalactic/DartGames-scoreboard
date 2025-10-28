@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { useTitle, getDisplayTitle } from "../hooks/useTitle";
+import { useTitle } from "../hooks/useTitle";
 import { useGameStore } from "../store";
 import { games } from "../constants/games";
 import { KillerSetupModal } from "../components/games/killer/KillerSetupModal";
