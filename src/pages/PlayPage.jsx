@@ -108,7 +108,14 @@ export function PlayPage() {
       : status === "win_pending" && remainingAfterWinner > 1;
   const nextPlace = currentPlace + 1;
 
-  const podiumEntries = (podium || []).map((id, i) => {
+  const finishedOrderIds = [
+    ...(podium || []),
+    ...Object.keys(finishTimes || {}).sort(
+      (a, b) => (finishTimes?.[a] ?? Infinity) - (finishTimes?.[b] ?? Infinity)
+    ),
+  ].filter((id, idx, arr) => id && arr.indexOf(id) === idx);
+
+  const results = finishedOrderIds.map((id, i) => {
     const p = players.find((x) => x.id === id);
     const score = scores[id] ?? 0;
     const t = finishTimes?.[id] ?? (gameFinishedAt || Date.now());
@@ -119,25 +126,16 @@ export function PlayPage() {
       name: p?.name ?? "—",
       score,
       dur,
-      completed: true,
     };
   });
-
-  const podiumSet = new Set(podium || []);
-  const notCompleted = players
-    .filter((p) => !podiumSet.has(p.id))
-    .map((p) => {
-      const score = scores[p.id] ?? 0;
-      return {
-        place: null,
-        id: p.id,
-        name: p.name,
-        score,
-        dur: null,
-        completed: false,
-      };
-    })
-    .sort((a, b) => a.name.localeCompare(b.name));
+  const remaining = players
+    .filter((p) => !finishedOrderIds.includes(p.id))
+    .map((p) => ({
+      id: p.id,
+      name: p.name,
+      score: scores[p.id] ?? 0,
+    }))
+    .sort((a, b) => a.score - b.score);
 
   return (
     <>
@@ -211,21 +209,21 @@ export function PlayPage() {
         <ResultsCard>
           <ResultsHeader>Results</ResultsHeader>
           <ResultsList>
-            {podiumEntries.map((e) => (
+            {results.map((e) => (
               <li key={e.id}>
                 <span>{e.place}.</span>
                 <span>{e.name}</span>
                 <ResultMeta>{`${e.score} pts • ${e.dur}`}</ResultMeta>
               </li>
             ))}
-            {notCompleted.length > 0 &&
-              notCompleted.map((e) => (
-                <li key={e.id}>
-                  <span>•</span>
-                  <span>{e.name}</span>
-                  <ResultMeta>{`${e.score} pts • N/C`}</ResultMeta>
-                </li>
-              ))}
+
+            {remaining.map((e) => (
+              <li key={e.id}>
+                <span>•</span>
+                <span>{e.name}</span>
+                <ResultMeta>{`${e.score} pts • N/C`}</ResultMeta>
+              </li>
+            ))}
           </ResultsList>
 
           <ResultsActions>

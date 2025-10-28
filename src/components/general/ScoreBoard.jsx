@@ -30,6 +30,7 @@ export function ScoreBoard({
   lastTurns,
   finished,
   podium = [],
+  winnerId,
 }) {
   function sumThrow(t) {
     if (!t) return 0;
@@ -75,8 +76,17 @@ export function ScoreBoard({
           const roundTotal = sumThrows(showThrows);
           const place = placeOf(p.id);
           const isWinner = place === 1;
-          const badgeText =
-            place && (place === 1 ? "Winner" : `${place}. place`);
+          const pos = Array.isArray(podium) ? podium.indexOf(p.id) : -1;
+          const isPendingWinner = winnerId && winnerId === p.id && pos === -1;
+          const pendingPlace = (Array.isArray(podium) ? podium.length : 0) + 1;
+
+          let badgeText = null;
+          if (pos >= 0) {
+            badgeText = pos === 0 ? "Winner" : `${pos + 1}. place`;
+          } else if (isPendingWinner) {
+            badgeText =
+              pendingPlace === 1 ? "Winner" : `${pendingPlace}. place`;
+          }
 
           return (
             <Card
