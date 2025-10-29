@@ -5,6 +5,7 @@ import {
   findCheckout,
   formatRoute,
 } from "../lib/501";
+import { rtOnThrow, rtOnTurnEnd, rtOnBust, rtOnCheckout } from "../lib/runtime";
 
 export const game501Slice = (set, get) => ({
   startGame501() {
@@ -30,6 +31,7 @@ export const game501Slice = (set, get) => ({
       finishTimes: {},
       checkoutHint: null,
       mustDoubleOut: true,
+      x01Start: 501,
     });
     const s = get();
     const p = s.players[0];
@@ -62,6 +64,7 @@ export const game501Slice = (set, get) => ({
       finishTimes: {},
       checkoutHint: null,
       mustDoubleOut: true,
+      x01Start: 301,
     });
     const s = get();
     const p = s.players[0];
@@ -100,6 +103,14 @@ export const game501Slice = (set, get) => ({
     const used = newThrows.reduce((sum, x) => sum + throwPoints(x), 0);
     const remain = startScore - used;
 
+    rtOnThrow(get, set, {
+      playerId: p.id,
+      t,
+      preScore: startScore,
+      postScore: remain,
+      bust: false,
+    });
+
     const lastThrow = t;
     const mustDouble = !!s.mustDoubleOut;
     const bust =
@@ -108,6 +119,9 @@ export const game501Slice = (set, get) => ({
       (mustDouble && remain === 0 && !isDoubleThrow(lastThrow));
 
     if (bust) {
+      rtOnBust(get, set, { playerId: p.id });
+      rtOnTurnEnd(get, set, { playerId: p.id, turnScore: 0 });
+
       const nextPlayerIndex = nextAlivePlayerIndex(
         s.players,
         pIndex,
@@ -135,6 +149,21 @@ export const game501Slice = (set, get) => ({
       const now = Date.now();
       const lastTurns = { ...s.lastTurns, [p.id]: newThrows };
       const finishTimes = { ...s.finishTimes, [p.id]: now };
+      rtOnCheckout(get, set, { playerId: p.id, points: startScore });
+      rtOnTurnEnd(get, set, {
+        playerId: p.id,
+        turnScore: newThrows.reduce(
+          (s, x) =>
+            s +
+            (x.value === 25
+              ? x.mult === 2
+                ? 50
+                : 25
+              : (x.value || 0) * (x.mult || 1)),
+          0
+        ),
+      });
+
       set({
         scores: { ...s.scores, [p.id]: 0 },
         currentThrows: newThrows,
@@ -168,6 +197,20 @@ export const game501Slice = (set, get) => ({
       const nextStart = get().scores[nextPlayer.id];
       const routesNext =
         mustDouble && nextStart > 1 ? findCheckout(nextStart, 3) : [];
+      rtOnTurnEnd(get, set, {
+        playerId: p.id,
+        turnScore: newThrows.reduce(
+          (s, x) =>
+            s +
+            (x.value === 25
+              ? x.mult === 2
+                ? 50
+                : 25
+              : (x.value || 0) * (x.mult || 1)),
+          0
+        ),
+      });
+
       set({
         scores: { ...s.scores, [p.id]: newScore },
         currentThrows: [],

@@ -1,3 +1,5 @@
+import { rtOnThrow, rtOnTurnEnd } from "../lib/runtime";
+
 export const gameClockSlice = (set, get) => ({
   startGameClock() {
     const players = get().players;
@@ -114,6 +116,14 @@ export const gameClockSlice = (set, get) => ({
       }
     }
 
+    rtOnThrow(get, set, {
+      playerId: p.id,
+      t,
+      preScore: currentTarget,
+      postScore: nextTarget,
+      bust: false,
+    });
+
     const ct = (s.currentThrows || []).slice();
     ct.push({ value: t.value, mult: t.mult });
 
@@ -135,6 +145,13 @@ export const gameClockSlice = (set, get) => ({
 
     if (endTurn) {
       lastTurns[p.id] = ct.slice();
+      const turnScore = ct.reduce((s, x) => {
+        if (x.value === 0) return s;
+        if (x.value === 25) return s + (x.mult === 2 ? 50 : 25);
+        return s + (x.value || 0) * (x.mult || 1);
+      }, 0);
+      rtOnTurnEnd(get, set, { playerId: p.id, turnScore });
+
       const n = players.length;
       for (let i = 1; i <= n; i++) {
         const idx = (playerIndex + i) % n;

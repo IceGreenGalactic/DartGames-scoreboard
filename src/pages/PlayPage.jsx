@@ -22,19 +22,7 @@ import {
 import { useGameStore } from "../store";
 import { rulesByGame } from "../components/rules";
 import { WinnerModal } from "../components/general/WinnerModal";
-
-function formatDuration(ms) {
-  if (!ms || ms < 0) return "0s";
-  const s = Math.floor(ms / 1000);
-  const h = Math.floor(s / 3600);
-  const m = Math.floor((s % 3600) / 60);
-  const sec = s % 60;
-  const parts = [];
-  if (h) parts.push(`${h}h`);
-  if (m || h) parts.push(`${m}m`);
-  parts.push(`${sec}s`);
-  return parts.join(" ");
-}
+import { buildResults, formatResultMeta } from "../store/lib/results";
 
 export function PlayPage() {
   const { gameId } = useParams();
@@ -65,6 +53,8 @@ export function PlayPage() {
   const targetsClock = useGameStore((s) => s.targetsClock);
   const mustDoubleOut = useGameStore((s) => s.mustDoubleOut);
   const toggleDoubleOut = useGameStore((s) => s.toggleDoubleOut);
+  const killsMap = useGameStore((s) => s.kills);
+  const eliminationLog = useGameStore((s) => s.eliminationLog);
 
   const throwDart =
     gameId === "killer"
@@ -108,34 +98,18 @@ export function PlayPage() {
       : status === "win_pending" && remainingAfterWinner > 1;
   const nextPlace = currentPlace + 1;
 
-  const finishedOrderIds = [
-    ...(podium || []),
-    ...Object.keys(finishTimes || {}).sort(
-      (a, b) => (finishTimes?.[a] ?? Infinity) - (finishTimes?.[b] ?? Infinity)
-    ),
-  ].filter((id, idx, arr) => id && arr.indexOf(id) === idx);
-
-  const results = finishedOrderIds.map((id, i) => {
-    const p = players.find((x) => x.id === id);
-    const score = scores[id] ?? 0;
-    const t = finishTimes?.[id] ?? (gameFinishedAt || Date.now());
-    const dur = formatDuration(t - gameStartedAt);
-    return {
-      place: i + 1,
-      id,
-      name: p?.name ?? "—",
-      score,
-      dur,
-    };
+  const { results, remaining } = buildResults({
+    gameId,
+    players,
+    podium,
+    finishTimes,
+    gameStartedAt,
+    gameFinishedAt,
+    scores,
+    killsMap,
+    winnerId,
+    eliminationLog,
   });
-  const remaining = players
-    .filter((p) => !finishedOrderIds.includes(p.id))
-    .map((p) => ({
-      id: p.id,
-      name: p.name,
-      score: scores[p.id] ?? 0,
-    }))
-    .sort((a, b) => a.score - b.score);
 
   return (
     <>
@@ -213,7 +187,7 @@ export function PlayPage() {
               <li key={e.id}>
                 <span>{e.place}.</span>
                 <span>{e.name}</span>
-                <ResultMeta>{`${e.score} pts • ${e.dur}`}</ResultMeta>
+                <ResultMeta>{formatResultMeta(gameId, e, false)}</ResultMeta>
               </li>
             ))}
 
@@ -221,7 +195,7 @@ export function PlayPage() {
               <li key={e.id}>
                 <span>•</span>
                 <span>{e.name}</span>
-                <ResultMeta>{`${e.score} pts • N/C`}</ResultMeta>
+                <ResultMeta>{formatResultMeta(gameId, e, true)}</ResultMeta>
               </li>
             ))}
           </ResultsList>

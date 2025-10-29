@@ -1,4 +1,5 @@
 import { shufflePlayers } from "../lib/turnOrder";
+import { initRuntime, exportRuntime } from "../lib/runtime";
 
 export const sessionSlice = (set, get) => ({
   scores: {},
@@ -20,6 +21,7 @@ export const sessionSlice = (set, get) => ({
   checkoutHint: null,
   hasLoggedSession: false,
   mustDoubleOut: null,
+  runtime: null,
 
   snapshot() {
     const s = get();
@@ -69,44 +71,44 @@ export const sessionSlice = (set, get) => ({
       hasLoggedSession: false,
       players: preservePlayers ? s.players : [],
       mustDoubleOut: null,
+      runtime: null,
+      x01Start: null,
     });
   },
 
   startGame(gameId, names, numbers, options) {
     const s = get();
-    if (!s.players?.length) return;
 
     if (gameId === "501") {
-      const shuffled = shufflePlayers(s.players);
-      set({ players: shuffled });
+      set({ players: shufflePlayers(s.players || []) });
       get().startGame501();
-      set({ hasLoggedSession: false });
-      return;
-    }
-    if (gameId === "301") {
-      const shuffled = shufflePlayers(s.players);
-      set({ players: shuffled });
-      get().startGame301();
-      set({ hasLoggedSession: false });
-      return;
-    }
-    if (gameId === "killer") {
-      const shuffled = shufflePlayers(s.players);
-      set({ players: shuffled });
-      get().startGameKiller(names, numbers, options);
-      set({ hasLoggedSession: false });
-      return;
-    }
-    if (gameId === "clock") {
-      const shuffled = shufflePlayers(s.players);
-      set({ players: shuffled });
-      get().startGameClock();
+      initRuntime(get, set, "501");
       set({ hasLoggedSession: false });
       return;
     }
 
-    const shuffled = shufflePlayers(s.players);
-    set({ players: shuffled });
+    if (gameId === "301") {
+      set({ players: shufflePlayers(s.players || []) });
+      get().startGame301();
+      initRuntime(get, set, "301");
+      set({ hasLoggedSession: false });
+      return;
+    }
+
+    if (gameId === "killer") {
+      get().startGameKiller(names, numbers, options);
+      initRuntime(get, set, "killer");
+      set({ hasLoggedSession: false });
+      return;
+    }
+
+    if (gameId === "clock") {
+      set({ players: shufflePlayers(s.players || []) });
+      get().startGameClock();
+      initRuntime(get, set, "clock");
+      set({ hasLoggedSession: false });
+      return;
+    }
 
     set({
       gameType: gameId,
@@ -126,29 +128,25 @@ export const sessionSlice = (set, get) => ({
       checkoutHint: null,
       hasLoggedSession: false,
     });
+    initRuntime(get, set, gameId);
   },
 
   throwDart(payload) {
     const type = get().gameType;
-
     if (type === "501" || type === "301") return get().throwDart501(payload);
     if (type === "killer") return get().throwDartKiller(payload);
     if (type === "clock") return get().throwDartClock(payload);
-
     const s = get();
     if (s.status !== "in_progress") return;
-
     const prev = get().snapshot();
     const pIndex = s.turn.playerIndex;
     const p = s.players[pIndex];
     if (!p) return;
-
     const newThrows = [
       ...s.currentThrows,
       { value: payload.value ?? 0, mult: payload.mult ?? 1 },
     ];
     const nextDart = s.turn.dartIndex + 1;
-
     if (nextDart >= 3) {
       const lastTurns = { ...s.lastTurns, [p.id]: newThrows };
       set({
@@ -169,9 +167,7 @@ export const sessionSlice = (set, get) => ({
   continueForPlacements() {
     const type = get().gameType;
     const s = get();
-    if (!s.hasLoggedSession && s.winnerId) {
-      get().finalizeWinner(s.winnerId);
-    }
+    if (!s.hasLoggedSession && s.winnerId) get().finalizeWinner(s.winnerId);
     if (type === "501" || type === "301")
       return get().continueForPlacements501();
     if (type === "clock") return get().continueForPlacementsClock();
@@ -182,10 +178,7 @@ export const sessionSlice = (set, get) => ({
     const prev = s.history.at(-1);
     if (!prev) return;
     const state = JSON.parse(prev);
-    set({
-      ...state,
-      history: s.history.slice(0, -1),
-    });
+    set({ ...state, history: s.history.slice(0, -1) });
   },
 
   finalizeWinner(winnerId) {
@@ -195,7 +188,6 @@ export const sessionSlice = (set, get) => ({
     if (winnerId && !podium.includes(winnerId)) podium.push(winnerId);
     const ft = { ...(s.finishTimes || {}) };
     if (winnerId && !ft[winnerId]) ft[winnerId] = now;
-
     set({
       status: "win_pending",
       winnerId: winnerId || s.winnerId || null,
@@ -203,18 +195,19 @@ export const sessionSlice = (set, get) => ({
       podium,
       finishTimes: ft,
     });
-
     const g = get();
     if (podium.length === 1 && !g.hasLoggedSession && g.addSession) {
       const w = g.players.find((p) => p.id === (winnerId || g.winnerId));
-      const payload = {
+      const base = {
         id: crypto.randomUUID(),
         game: g.gameType,
         date: new Date().toISOString(),
         players: g.players.map((x) => x.name),
         winner: w ? w.name : null,
+        x01Start: g.x01Start || null,
       };
-      g.addSession(payload);
+      const rt = exportRuntime(get);
+      g.addSession({ ...base, ...rt });
       set({ hasLoggedSession: true });
     }
   },
@@ -240,11 +233,9 @@ export const sessionSlice = (set, get) => ({
       finishTimes: { ...(s2.finishTimes || {}) },
     });
   },
+
   toggleDoubleOut() {
     const s = get();
-    set({
-      mustDoubleOut: !s.mustDoubleOut,
-      checkoutHint: null,
-    });
+    set({ mustDoubleOut: !s.mustDoubleOut, checkoutHint: null });
   },
 });
