@@ -110,6 +110,14 @@ export const sessionSlice = (set, get) => ({
       return;
     }
 
+    if (gameId === "cricket") {
+      set({ players: shufflePlayers(s.players || []) });
+      get().startGameCricket();
+      initRuntime(get, set, "cricket");
+      set({ hasLoggedSession: false });
+      return;
+    }
+
     set({
       gameType: gameId,
       status: "in_progress",
@@ -136,6 +144,8 @@ export const sessionSlice = (set, get) => ({
     if (type === "501" || type === "301") return get().throwDart501(payload);
     if (type === "killer") return get().throwDartKiller(payload);
     if (type === "clock") return get().throwDartClock(payload);
+    if (type === "cricket") return get().throwDartCricket(payload);
+
     const s = get();
     if (s.status !== "in_progress") return;
     const prev = get().snapshot();
@@ -171,6 +181,7 @@ export const sessionSlice = (set, get) => ({
     if (type === "501" || type === "301")
       return get().continueForPlacements501();
     if (type === "clock") return get().continueForPlacementsClock();
+    if (type === "cricket") return get().continueForPlacementsCricket();
   },
 
   undo() {

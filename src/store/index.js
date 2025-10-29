@@ -5,6 +5,7 @@ import { sessionSlice } from "./slices/sessionSlice";
 import { game501Slice } from "./slices/game501Slice";
 import { gameKillerSlice } from "./slices/gameKillerSlice";
 import { gameClockSlice } from "./slices/gameClockSlice";
+import { gameCricketSlice } from "./slices/gameCricketSlice";
 import { statsSlice } from "./slices/statsSlice";
 import { themeSlice } from "./slices/themeSlice";
 
@@ -18,6 +19,7 @@ export const useGameStore = create(
       ...gameClockSlice(set, get, api),
       ...statsSlice(set, get, api),
       ...themeSlice(set, get, api),
+      ...gameCricketSlice(set, get),
     }),
     {
       name: "dartgames-store",

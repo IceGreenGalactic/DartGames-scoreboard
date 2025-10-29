@@ -1,4 +1,5 @@
-// ---- RUNTIME HELPERS ----
+import { CRICKET_ORDER } from "./cricketCore";
+
 export function initRuntime(get, set, gameType) {
   const s = get();
   const perPlayer = {};
@@ -96,6 +97,7 @@ export function exportRuntime(get) {
   const rt = s.runtime;
   if (!rt) return {};
   const nameOf = (id) => s.players.find((x) => x.id === id)?.name || id;
+
   const dartsPerPlayer = {};
   const bestTurnPerPlayer = {};
   const oneEightiesPerPlayer = {};
@@ -108,7 +110,8 @@ export function exportRuntime(get) {
     oneFortiesPerPlayer[nameOf(id)] = pp["140s"] || 0;
     bustsPerPlayer[nameOf(id)] = pp.busts || 0;
   });
-  return {
+
+  const out = {
     dartsPerPlayer,
     bestTurnPerPlayer,
     oneEightiesPerPlayer,
@@ -116,6 +119,22 @@ export function exportRuntime(get) {
     bustsPerPlayer,
     highestCheckout: rt.highestCheckout || 0,
     dartsUsedToFinish: rt.dartsUsedToFinish || null,
-    ...(s.gameType === "killer" && s.kills ? { kills: { ...s.kills } } : {}),
   };
+
+  if (s.gameType === "killer" && s.kills) {
+    out.kills = { ...s.kills };
+  }
+
+  if (s.gameType === "cricket" && s.cricketMarks) {
+    const closed = {};
+    (s.players || []).forEach((pl) => {
+      const m = s.cricketMarks?.[pl.id] || {};
+      let c = 0;
+      for (const k of CRICKET_ORDER) if ((m[k] || 0) >= 3) c++;
+      closed[pl.name] = c;
+    });
+    out.cricketClosedPerPlayer = closed;
+  }
+
+  return out;
 }

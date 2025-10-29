@@ -38,6 +38,12 @@ const emptyStats = () => ({
       playsPerPlayer: {},
       fastestPerPlayer: {},
     },
+    cricket: {
+      plays: 0,
+      winsPerPlayer: {},
+      playsPerPlayer: {},
+      mostClosedPerPlayer: {},
+    },
   },
   totalPlays: 0,
 });
@@ -97,9 +103,9 @@ export function recomputeStats(sessions) {
       for (const p of s.players || []) inc(g.playsPerPlayer, p);
       if (s.winner) inc(g.winsPerPlayer, s.winner);
       if (s.kills) {
-        for (const [p, k] of Object.entries(s.kills)) {
-          maxInto(g.mostKillsPerPlayer, p, k);
-          inc(g.totalKillsPerPlayer, p, typeof k === "number" ? k : 0);
+        for (const [pname, k] of Object.entries(s.kills)) {
+          maxInto(g.mostKillsPerPlayer, pname, k);
+          inc(g.totalKillsPerPlayer, pname, typeof k === "number" ? k : 0);
         }
       }
     } else if (s.game === "clock" || s.game === "around-the-clock") {
@@ -107,11 +113,26 @@ export function recomputeStats(sessions) {
       g.plays += 1;
       for (const p of s.players || []) inc(g.playsPerPlayer, p);
       if (s.winner) inc(g.winsPerPlayer, s.winner);
-       if (s.dartsPerPlayer && s.winner) {
-    const d = s.dartsPerPlayer[s.winner];
-    if (typeof d === "number") minInto(g.fastestPerPlayer, s.winner, d);
-  }
-}
+      if (s.dartsPerPlayer && s.winner) {
+        const d = s.dartsPerPlayer[s.winner];
+        if (typeof d === "number") minInto(g.fastestPerPlayer, s.winner, d);
+      }
+    } else if (s.game === "cricket") {
+      const g = stats.byGame.cricket;
+      g.plays += 1;
+      for (const p of s.players || []) inc(g.playsPerPlayer, p);
+      if (s.winner) inc(g.winsPerPlayer, s.winner);
+
+      if (
+        s.cricketClosedPerPlayer &&
+        typeof s.cricketClosedPerPlayer === "object"
+      ) {
+        for (const [name, val] of Object.entries(s.cricketClosedPerPlayer)) {
+          if (typeof val === "number")
+            maxInto(g.mostClosedPerPlayer, name, val);
+        }
+      }
+    }
   }
 
   return stats;

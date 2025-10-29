@@ -7,6 +7,7 @@ import { ScoreBoard } from "../components/general/ScoreBoard";
 import { KillerScoreBoard } from "../components/games/killer/ScoreboardKiller";
 import { KillerSetupModal } from "../components/games/killer/KillerSetupModal";
 import { ClockScoreBoard } from "../components/games/clock/ScoreboardClock";
+import { CricketScoreBoard } from "../components/games/cricket/ScoreboardCricket";
 import {
   Title,
   ResultsCard,
@@ -55,6 +56,8 @@ export function PlayPage() {
   const toggleDoubleOut = useGameStore((s) => s.toggleDoubleOut);
   const killsMap = useGameStore((s) => s.kills);
   const eliminationLog = useGameStore((s) => s.eliminationLog);
+  const runtimePerPlayer = useGameStore((s) => s.runtime?.perPlayer);
+  const cricketMarks = useGameStore((s) => s.cricketMarks);
 
   const throwDart =
     gameId === "killer"
@@ -90,13 +93,19 @@ export function PlayPage() {
   const RulesComp = rulesByGame[gameId] || null;
 
   const canThrow = status === "in_progress" || status === "win_pending";
-  const currentPlace = (podium?.length || 0) + 1;
-  const remainingAfterWinner = players.length - (finishedIds.length + 1);
-  const canContinuePlacements =
-    gameId === "killer"
-      ? false
-      : status === "win_pending" && remainingAfterWinner > 1;
+
+  const decidedCount = Array.isArray(podium)
+    ? winnerId && !podium.includes(winnerId)
+      ? podium.length + 1
+      : podium.length
+    : winnerId
+    ? 1
+    : 0;
+  const currentPlace = decidedCount;
   const nextPlace = currentPlace + 1;
+  const remainingAfterWinner = players.length - decidedCount;
+  const canContinuePlacements =
+    gameId !== "killer" && status === "win_pending" && remainingAfterWinner > 1;
 
   const { results, remaining } = buildResults({
     gameId,
@@ -109,6 +118,9 @@ export function PlayPage() {
     killsMap,
     winnerId,
     eliminationLog,
+    targetsClock,
+    runtimePerPlayer,
+    cricketMarks,
   });
 
   return (
@@ -129,7 +141,19 @@ export function PlayPage() {
         </p>
       </Title>
 
-      {gameId === "killer" ? (
+      {gameId === "cricket" ? (
+        <CricketScoreBoard
+          players={players}
+          currentPlayerId={currentPlayer?.id}
+          activeIndex={turn.playerIndex}
+          scores={scores}
+          marks={cricketMarks}
+          lastTurns={lastTurns}
+          currentThrows={currentThrows}
+          winnerId={winnerId}
+          podium={podium}
+        />
+      ) : gameId === "killer" ? (
         <KillerScoreBoard
           players={players}
           currentPlayerId={currentPlayer?.id}

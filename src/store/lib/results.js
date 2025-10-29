@@ -14,7 +14,6 @@ export function formatDuration(ms) {
 function formatClockReachedLabel(scoreCell) {
   if (scoreCell == null) return "-";
   const s = String(scoreCell);
-
   if (/^Bx?3$/i.test(s)) return "B3";
   if (/^Bx?2$/i.test(s)) return "B2";
   if (/^Bx?1$/i.test(s) || /^Bull$/i.test(s)) return "B1";
@@ -34,6 +33,19 @@ function hitSummaryFromRuntime(pp) {
   return parts.join(" ");
 }
 
+// ---- Cricket helpers ----
+const CRICKET_KEYS = ["20", "19", "18", "17", "16", "15", "BULL"];
+function countClosed(marksMap) {
+  if (!marksMap) return 0;
+  let c = 0;
+  for (const k of CRICKET_KEYS) if ((marksMap[k] || 0) >= 3) c++;
+  return c;
+}
+function marksProgress(marksMap) {
+  if (!marksMap) return 0;
+  return CRICKET_KEYS.reduce((s, k) => s + Math.min(3, marksMap[k] || 0), 0);
+}
+
 export function buildResults({
   gameId,
   players,
@@ -45,9 +57,9 @@ export function buildResults({
   killsMap,
   winnerId,
   eliminationLog,
-
   runtimePerPlayer,
   targetsClock,
+  cricketMarks,
 }) {
   const playerIds = new Set(players.map((p) => p.id));
 
@@ -69,54 +81,94 @@ export function buildResults({
     });
   }
 
-  const results = finishedOrderIds.map((id, i) => {
-    const p = players.find((x) => x.id === id);
-    const rawScore =
-      gameId === "killer" ? killsMap?.[p?.name] || 0 : scores?.[id] ?? 0;
-    const t = finishTimes?.[id] ?? (gameFinishedAt || Date.now());
+  const baseRows = players.map((p) => {
+    const t = finishTimes?.[p.id] ?? (gameFinishedAt || Date.now());
     const dur = formatDuration(t - gameStartedAt);
 
-    const pp = runtimePerPlayer?.[id];
+    const pp = runtimePerPlayer?.[p.id];
     const darts = pp?.darts || null;
     const hitSummary = hitSummaryFromRuntime(pp);
-    const reachedLabel = formatClockReachedLabel(scores?.[id]);
+
+    const reachedLabel =
+      gameId === "clock" ? formatClockReachedLabel(scores?.[p.id]) : null;
+
+    const myMarks = cricketMarks?.[p.id];
+    const closed = gameId === "cricket" ? countClosed(myMarks) : null;
+    const progress = gameId === "cricket" ? marksProgress(myMarks) : null;
 
     let killedByName = null;
-    if (gameId === "killer" && id !== winnerId) {
-      const byId = killedByMap[id];
+    if (gameId === "killer" && p.id !== winnerId) {
+      const byId = killedByMap[p.id];
       killedByName = byId
         ? players.find((x) => x.id === byId)?.name || null
         : null;
     }
 
     return {
-      place: i + 1,
-      id,
-      name: p?.name ?? "—",
-      score: rawScore,
+      id: p.id,
+      name: p.name,
       dur,
-      killedByName,
       darts,
       hitSummary,
       reachedLabel,
+      killedByName,
+      killerKills: killsMap?.[p.name] || 0,
+      score: scores?.[p.id] ?? 0,
+      closed,
+      progress,
     };
   });
 
-  const remaining = players
-    .filter((p) => !finishedOrderIds.includes(p.id))
-    .map((p) => {
-      const pp = runtimePerPlayer?.[p.id];
-      return {
-        id: p.id,
-        name: p.name,
-        score:
-          gameId === "killer" ? killsMap?.[p.name] || 0 : scores?.[p.id] ?? 0,
+  const inFinished = new Set(finishedOrderIds);
+  const finishedRows = finishedOrderIds
+    .map((id) => baseRows.find((r) => r.id === id))
+    .filter(Boolean);
 
-        darts: pp?.darts || null,
-        hitSummary: hitSummaryFromRuntime(pp),
-        reachedLabel: formatClockReachedLabel(scores?.[p.id]),
-      };
-    });
+  const remainingRows = baseRows.filter((r) => !inFinished.has(r.id));
+
+  let sortedRemaining = remainingRows;
+  if (gameId === "cricket") {
+    sortedRemaining = remainingRows
+      .slice()
+      .sort(
+        (a, b) =>
+          (b.closed || 0) - (a.closed || 0) ||
+          (b.progress || 0) - (a.progress || 0) ||
+          a.name.localeCompare(b.name)
+      );
+  } else if (gameId === "clock") {
+    const rank = (lab) => {
+      const map = { B3: 24, B2: 23, B1: 22, T: 21, D: 20 };
+      const n = Number(lab);
+      if (!Number.isNaN(n)) return n;
+      return map[lab] || 0;
+    };
+    sortedRemaining = remainingRows
+      .slice()
+      .sort(
+        (a, b) =>
+          rank(b.reachedLabel) - rank(a.reachedLabel) ||
+          a.name.localeCompare(b.name)
+      );
+  } else if (gameId === "killer") {
+    sortedRemaining = remainingRows
+      .slice()
+      .sort(
+        (a, b) =>
+          (b.killerKills || 0) - (a.killerKills || 0) ||
+          a.name.localeCompare(b.name)
+      );
+  } else {
+    sortedRemaining = remainingRows
+      .slice()
+      .sort(
+        (a, b) =>
+          (a.score || 0) - (b.score || 0) || a.name.localeCompare(b.name)
+      );
+  }
+
+  const results = finishedRows.map((r, i) => ({ place: i + 1, ...r }));
+  const remaining = sortedRemaining.map((r) => ({ ...r }));
 
   return { results, remaining };
 }
@@ -125,7 +177,7 @@ export function formatResultMeta(gameId, row, isRemaining = false) {
   if (gameId === "killer") {
     const bits = [];
     bits.push(isRemaining ? "N/C" : row.dur);
-    if (row.score) bits.push(`${row.score} kills`);
+    if (row.killerKills) bits.push(`${row.killerKills} kills`);
     if (!isRemaining && row.killedByName)
       bits.push(`killed by ${row.killedByName}`);
     return bits.join(" • ");
@@ -141,6 +193,21 @@ export function formatResultMeta(gameId, row, isRemaining = false) {
       const parts = [row.dur];
       if (row?.darts) parts.push(`${row.darts} darts`);
       if (row?.hitSummary) parts.push(row.hitSummary);
+      return parts.join(" • ");
+    }
+  }
+
+  if (gameId === "cricket") {
+    const closedStr =
+      typeof row.closed === "number" ? `${row.closed}/7 closed` : null;
+
+    if (isRemaining) {
+      const parts = ["N/C"];
+      if (closedStr) parts.push(closedStr);
+      return parts.join(" • ");
+    } else {
+      const parts = [row.dur];
+      if (closedStr) parts.push(closedStr);
       return parts.join(" • ");
     }
   }

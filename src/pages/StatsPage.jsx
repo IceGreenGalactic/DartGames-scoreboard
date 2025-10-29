@@ -37,6 +37,12 @@ const defaultClock = {
   playsPerPlayer: {},
   fastestPerPlayer: {},
 };
+const defaultCricket = {
+  plays: 0,
+  winsPerPlayer: {},
+  playsPerPlayer: {},
+  mostClosedPerPlayer: {},
+};
 
 function sumMaps(...maps) {
   const out = {};
@@ -76,6 +82,7 @@ export default function StatsPage() {
   const g301 = stats?.byGame?.["301"] ?? defaultX01;
   const killer = stats?.byGame?.killer ?? defaultKiller;
   const atc = stats?.byGame?.["clock"] ?? defaultClock;
+  const cricket = stats?.byGame?.["cricket"] ?? defaultCricket;
 
   const rows501 = useMemo(() => {
     const base = rowsFromPlaysWins(g501.playsPerPlayer, g501.winsPerPlayer);
@@ -112,21 +119,34 @@ export default function StatsPage() {
     }));
   }, [atc]);
 
+  const rowsCricket = useMemo(() => {
+    const base = rowsFromPlaysWins(
+      cricket.playsPerPlayer,
+      cricket.winsPerPlayer
+    );
+    return base.map((r) => ({
+      ...r,
+      mostClosed: cricket.mostClosedPerPlayer[r.player] ?? "-",
+    }));
+  }, [cricket]);
+
   const overall = useMemo(() => {
     const plays = sumMaps(
       g501.playsPerPlayer,
       g301.playsPerPlayer,
       killer.playsPerPlayer,
-      atc.playsPerPlayer
+      atc.playsPerPlayer,
+      cricket.playsPerPlayer
     );
     const wins = sumMaps(
       g501.winsPerPlayer,
       g301.winsPerPlayer,
       killer.winsPerPlayer,
-      atc.winsPerPlayer
+      atc.winsPerPlayer,
+      cricket.winsPerPlayer
     );
     return rowsFromPlaysWins(plays, wins);
-  }, [g501, g301, killer, atc]);
+  }, [g501, g301, killer, atc, cricket]);
 
   return (
     <Wrapper>
@@ -152,6 +172,10 @@ export default function StatsPage() {
         <StatBox>
           <StatValue>{atc.plays}</StatValue>
           <StatLabel>Around the Clock spill</StatLabel>
+        </StatBox>
+        <StatBox>
+          <StatValue>{cricket.plays}</StatValue>
+          <StatLabel>Cricket spill</StatLabel>
         </StatBox>
       </SummaryGrid>
 
@@ -283,6 +307,32 @@ export default function StatsPage() {
                 <Td>{r.wins}</Td>
                 <Td>{r.winPct}</Td>
                 <Td>{r.fastest}</Td>
+              </Tr>
+            ))}
+          </TBody>
+        </Table>
+      </Section>
+
+      <Section>
+        <H3>Cricket</H3>
+        <Table>
+          <THead>
+            <Tr>
+              <Th>Spiller</Th>
+              <Th>Plays</Th>
+              <Th>Wins</Th>
+              <Th>Win%</Th>
+              <Th>Mest lukket (0–7)</Th>
+            </Tr>
+          </THead>
+          <TBody>
+            {rowsCricket.map((r) => (
+              <Tr key={r.player}>
+                <Td>{r.player}</Td>
+                <Td>{r.plays}</Td>
+                <Td>{r.wins}</Td>
+                <Td>{r.winPct}</Td>
+                <Td>{r.mostClosed}</Td>
               </Tr>
             ))}
           </TBody>

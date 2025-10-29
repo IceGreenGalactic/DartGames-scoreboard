@@ -3,4 +3,5 @@ export const games = [
   { id: "301", title: "301" },
   { id: "killer", title: "Killer" },
   { id: "clock", title: "Around the Clock" },
+  { id: "cricket", title: "Cricket" },
 ];
