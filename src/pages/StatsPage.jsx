@@ -42,7 +42,7 @@ export default function StatsPage() {
 
   const g501 = stats.byGame["501"];
   const killer = stats.byGame.killer;
-  const atc = stats.byGame["around-the-clock"];
+ const atc = stats.byGame["clock"];
 
   const rows501 = useMemo(
     () => rowsFromPlaysWins(g501.playsPerPlayer, g501.winsPerPlayer),

@@ -25,7 +25,7 @@ const emptyStats = () => ({
       playsPerPlayer: {},
       mostKillsPerPlayer: {},
     },
-    "around-the-clock": {
+    clock: {
       plays: 0,
       winsPerPlayer: {},
       playsPerPlayer: {},
@@ -64,8 +64,8 @@ export function recomputeStats(sessions) {
         for (const [p, k] of Object.entries(s.kills))
           maxInto(g.mostKillsPerPlayer, p, k);
       }
-    } else if (s.game === "around-the-clock") {
-      const g = stats.byGame["around-the-clock"];
+    } else if (s.game === "clock" || s.game === "around-the-clock") {
+      const g = stats.byGame.clock;
       g.plays += 1;
       for (const p of s.players || []) inc(g.playsPerPlayer, p);
       if (s.winner) inc(g.winsPerPlayer, s.winner);

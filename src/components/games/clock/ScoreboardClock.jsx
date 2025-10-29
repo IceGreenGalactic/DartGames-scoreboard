@@ -28,7 +28,8 @@ export function ClockScoreBoard({
   finished,
   winnerId,
   podium,
-}) {
+}) 
+{
   return (
     <Board>
       <Cards>

@@ -28,6 +28,7 @@ export const gameClockSlice = (set, get) => ({
       gameStartedAt: Date.now(),
       gameFinishedAt: null,
       finishTimes: {},
+      hasLoggedSession: false,
     });
   },
 
@@ -98,6 +99,10 @@ export const gameClockSlice = (set, get) => ({
             finishTimes: { ...finishTimes, [p.id]: now },
             history: [...(s.history || []), prev].slice(-50),
           });
+          const g = get();
+          if (!g.hasLoggedSession && g.finalizeWinner) {
+            g.finalizeWinner(p.id);
+          }
           return;
         } else if (remain === 2) {
           nextTarget = "BULL2";
