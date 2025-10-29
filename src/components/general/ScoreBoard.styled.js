@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { rgba, bonusCardPulse, bonusBadgeStyles } from "../../styles/general";
 
 export const Board = styled.div`
   margin-top: 12px;
@@ -15,7 +16,6 @@ export const Cards = styled.div`
   @media (max-width: 700px) {
     grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
   }
-
   @media (orientation: landscape) and (max-height: 520px) {
     grid-template-columns: 1fr;
     gap: 8px;
@@ -36,7 +36,10 @@ export const Card = styled.div`
   }
   &[data-winner="true"] {
     outline: 2px solid ${({ theme }) => theme.colors.accent};
-    box-shadow: 0 0 0 4px rgba(61, 220, 151, 0.2) inset;
+    box-shadow: 0 0 0 4px ${({ theme }) => rgba(theme.colors.accent, 0.2)} inset;
+  }
+  &[data-bonus="true"] {
+    ${({ theme }) => bonusCardPulse(theme.colors.accent)}
   }
 
   @media (orientation: landscape) and (max-height: 520px) {
@@ -86,7 +89,6 @@ export const Boxes = styled.div`
     font-size: 12px;
     margin-top: 3px;
   }
-
   @media (orientation: landscape) and (max-height: 520px) {
     margin: 0;
     justify-self: end;
@@ -127,12 +129,11 @@ export const RoundSum = styled.div`
     font-size: 12px;
     margin-top: 2px;
   }
-
   @media (orientation: landscape) and (max-height: 520px) {
     justify-self: start;
     margin: 0;
     font-size: 12px;
-     min-height: 18px;
+    min-height: 18px;
   }
 `;
 
@@ -146,6 +147,11 @@ export const Badge = styled.div`
   padding: 4px 8px;
   border-radius: 999px;
   font-weight: 700;
+
+  &[data-type="bonus"] {
+    ${({ theme }) => bonusBadgeStyles(theme.colors.accent)}
+    font-size: 11px;
+  }
 
   @media (orientation: landscape) and (max-height: 520px) {
     position: static;

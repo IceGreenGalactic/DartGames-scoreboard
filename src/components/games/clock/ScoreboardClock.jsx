@@ -1,3 +1,4 @@
+import { useGameStore } from "../../../store";
 import {
   Board,
   Cards,
@@ -28,8 +29,11 @@ export function ClockScoreBoard({
   finished,
   winnerId,
   podium,
-}) 
-{
+}) {
+  const clockBonusTick = useGameStore((s) => s.clockBonusTick);
+  const bonusActive =
+    clockBonusTick && Date.now() - clockBonusTick < 2400 ? true : false;
+
   return (
     <Board>
       <Cards>
@@ -41,6 +45,7 @@ export function ClockScoreBoard({
           const isPendingWinner = winnerId && winnerId === p.id && pos === -1;
           const pendingPlace = (Array.isArray(podium) ? podium.length : 0) + 1;
           const showWinner = winnerId && winnerId === p.id;
+
           let badge = null;
           if (pos >= 0) {
             badge = pos === 0 ? "Winner" : `${pos + 1}. place`;
@@ -54,10 +59,18 @@ export function ClockScoreBoard({
           ];
 
           return (
-            <Card key={p.id} data-active={isActive}>
+            <Card
+              key={p.id}
+              data-active={isActive}
+              data-bonus={isActive && bonusActive}
+              data-winner={pos === 0 || showWinner}
+            >
               <Name>
                 {p.name}
                 {badge ? <Badge>{badge}</Badge> : null}
+                {isActive && bonusActive ? (
+                  <Badge data-type="bonus">Bonus Round</Badge>
+                ) : null}
               </Name>
               <Score>{scores?.[p.id] ?? 0}</Score>
               <Boxes>

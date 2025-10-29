@@ -31,6 +31,8 @@ export const gameClockSlice = (set, get) => ({
       gameFinishedAt: null,
       finishTimes: {},
       hasLoggedSession: false,
+      clockHitsInTurn: {},
+      clockBonusTick: 0,
     });
   },
 
@@ -50,6 +52,7 @@ export const gameClockSlice = (set, get) => ({
     const scores = { ...(s.scores || {}) };
     const lastTurns = { ...(s.lastTurns || {}) };
     const finishTimes = { ...(s.finishTimes || {}) };
+    const hitsInTurn = { ...(s.clockHitsInTurn || {}) };
 
     const currentTarget = targets[p.id];
     const t = { value: value ?? 0, mult: mult ?? 1 };
@@ -100,6 +103,7 @@ export const gameClockSlice = (set, get) => ({
             lastTurns,
             finishTimes: { ...finishTimes, [p.id]: now },
             history: [...(s.history || []), prev].slice(-50),
+            clockHitsInTurn: { ...hitsInTurn, [p.id]: 0 },
           });
           const g = get();
           if (!g.hasLoggedSession && g.finalizeWinner) {
@@ -124,13 +128,14 @@ export const gameClockSlice = (set, get) => ({
       bust: false,
     });
 
+    const progressed = nextTarget !== currentTarget;
+    const prevHits = hitsInTurn[p.id] || 0;
+    hitsInTurn[p.id] = progressed ? prevHits + 1 : 0;
+
     const ct = (s.currentThrows || []).slice();
     ct.push({ value: t.value, mult: t.mult });
 
-    const nextDartIndex = dartIndex + 1;
-    let nextPlayerIndex = playerIndex;
-
-    if (nextTarget !== currentTarget) {
+    if (progressed) {
       targets[p.id] = nextTarget;
       if (typeof nextTarget === "number") scores[p.id] = nextTarget;
       if (nextTarget === "DANY") scores[p.id] = "D";
@@ -141,6 +146,8 @@ export const gameClockSlice = (set, get) => ({
       if (nextTarget === "DONE") scores[p.id] = "-";
     }
 
+    const nextDartIndex = dartIndex + 1;
+    let nextPlayerIndex = playerIndex;
     const endTurn = nextDartIndex >= 3;
 
     if (endTurn) {
@@ -152,6 +159,23 @@ export const gameClockSlice = (set, get) => ({
       }, 0);
       rtOnTurnEnd(get, set, { playerId: p.id, turnScore });
 
+      if ((hitsInTurn[p.id] || 0) === 3) {
+        set({
+          history: [...(s.history || []), prev].slice(-50),
+          targetsClock: targets,
+          scores,
+          lastTurns,
+          currentThrows: [],
+          turn: { playerIndex, dartIndex: 0 },
+          finishedIds: Array.from(finished),
+          podium,
+          finishTimes,
+          clockHitsInTurn: { ...hitsInTurn, [p.id]: 0 },
+          clockBonusTick: Date.now(),
+        });
+        return;
+      }
+
       const n = players.length;
       for (let i = 1; i <= n; i++) {
         const idx = (playerIndex + i) % n;
@@ -161,13 +185,15 @@ export const gameClockSlice = (set, get) => ({
           break;
         }
       }
+      hitsInTurn[p.id] = 0;
     }
 
     const allFinished = players.every(
       (pl) => finished.has(pl.id) || targets[pl.id] === "DONE"
     );
 
-    const nextState = {
+    set({
+      history: [...(s.history || []), prev].slice(-50),
       targetsClock: targets,
       scores,
       lastTurns,
@@ -178,11 +204,7 @@ export const gameClockSlice = (set, get) => ({
       finishedIds: Array.from(finished),
       podium,
       finishTimes,
-    };
-
-    set({
-      history: [...(s.history || []), prev].slice(-50),
-      ...nextState,
+      clockHitsInTurn: hitsInTurn,
     });
 
     if (allFinished) {
@@ -193,6 +215,7 @@ export const gameClockSlice = (set, get) => ({
       });
     }
   },
+
   continueForPlacementsClock() {
     const s = get();
     if (s.status !== "win_pending" || !s.winnerId) return;
