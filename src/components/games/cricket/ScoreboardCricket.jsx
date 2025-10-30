@@ -1,15 +1,10 @@
 import { useActiveScrollBias } from "../../../hooks/useActiveScrollBias";
-import {
-  Board,
-  Cards,
-  Card,
-  Name,
-  Boxes,
-  Box,
-  Badge,
-} from "../../general/ScoreBoard.styled";
+import { Name, Boxes, Box, Badge } from "../../general/ScoreBoard.styled";
 import { CRICKET_ORDER } from "../../../store/lib/cricketCore";
 import {
+  CricketBoard as Board,
+  CricketCards as Cards,
+  CricketCard as Card,
   MarksGrid,
   MarkRow,
   MarkKey,
@@ -36,7 +31,7 @@ function formatThrowLabel(t) {
   return String(t.value);
 }
 
-export function CricketScoreBoard({ ...props }) {
+export function CricketScoreBoard(props) {
   const {
     players,
     currentPlayerId,
@@ -57,6 +52,7 @@ export function CricketScoreBoard({ ...props }) {
     bottomSafeAreaPx: 260,
     ordering: "rotate-end",
   });
+
   return (
     <Board>
       <Cards>
@@ -91,6 +87,7 @@ export function CricketScoreBoard({ ...props }) {
                 {p.name}
                 {badge ? <Badge>{badge}</Badge> : null}
               </Name>
+
               <MarksGrid>
                 {CRICKET_ORDER.map((k) => (
                   <MarkRow key={k}>
@@ -101,6 +98,7 @@ export function CricketScoreBoard({ ...props }) {
                   </MarkRow>
                 ))}
               </MarksGrid>
+
               <ThrowsBoxes as={Boxes}>
                 {padded.map((label, idx) => (
                   <Box key={idx}>{label}</Box>
