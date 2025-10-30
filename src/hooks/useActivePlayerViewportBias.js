@@ -7,61 +7,69 @@ export function useActivePlayerViewportBias({
   currentPlayerId,
   maxLandscapeHeight = 520,
   bottomSafeAreaPx = 0,
-  enableDynamicBias = true,
   ordering = "rotate-end",
 }) {
-  const getLandscapeMQ = () =>
-    typeof window !== "undefined"
-      ? window.matchMedia(
-          `(orientation: landscape) and (max-height: ${maxLandscapeHeight}px)`
-        )
-      : {
-          matches: false,
-          addEventListener() {},
-          removeEventListener() {},
-          addListener() {},
-          removeListener() {},
-        };
+  const getMQ = () => ({
+    landscape:
+      typeof window !== "undefined"
+        ? window.matchMedia(`(orientation: landscape)`)
+        : { matches: false, addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {} },
+    smallLandscape:
+      typeof window !== "undefined"
+        ? window.matchMedia(`(orientation: landscape) and (max-height: ${maxLandscapeHeight}px)`)
+        : { matches: false, addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {} },
+  });
 
-  const [landscapeBias, setLandscapeBias] = useState(getLandscapeMQ().matches);
-  const [dynamicBias, setDynamicBias] = useState(false);
+  const { landscape, smallLandscape } = getMQ();
+  const [isLandscape, setIsLandscape] = useState(landscape.matches);
+  const [isSmallLandscape, setIsSmallLandscape] = useState(smallLandscape.matches);
 
   useEffect(() => {
-    const mq = getLandscapeMQ();
-    const onChange = (e) => setLandscapeBias(e.matches);
-    if (mq.addEventListener) mq.addEventListener("change", onChange);
-    else mq.addListener(onChange);
+    const { landscape: lmq, smallLandscape: smq } = getMQ();
+    const onL = (e) => setIsLandscape(e.matches ?? e.currentTarget?.matches ?? false);
+    const onS = (e) => setIsSmallLandscape(e.matches ?? e.currentTarget?.matches ?? false);
+
+    if (lmq.addEventListener) lmq.addEventListener("change", onL);
+    else lmq.addListener(onL);
+
+    if (smq.addEventListener) smq.addEventListener("change", onS);
+    else smq.addListener(onS);
+
     return () => {
-      if (mq.removeEventListener) mq.removeEventListener("change", onChange);
-      else mq.removeListener(onChange);
+      if (lmq.removeEventListener) lmq.removeEventListener("change", onL);
+      else lmq.removeListener(onL);
+
+      if (smq.removeEventListener) smq.removeEventListener("change", onS);
+      else smq.removeListener(onS);
     };
   }, [maxLandscapeHeight]);
 
   const activeRef = useRef(null);
+  const [hiddenNearKeyboard, setHiddenNearKeyboard] = useState(false);
 
   const checkHidden = () => {
     const el = activeRef.current;
-    if (!el) return false;
+    if (!el || typeof window === "undefined") return false;
     const r = el.getBoundingClientRect();
     const vh = window.visualViewport?.height ?? window.innerHeight;
-    const threshold = vh - bottomSafeAreaPx - 8;
+    const threshold = vh - bottomSafeAreaPx - 8; // “over” keyboard
     return r.bottom > threshold || r.top < 0;
   };
 
   useEffect(() => {
-    if (!enableDynamicBias) return;
+    // Kun IntersectionObserver, ingen scroll-lyttere
     let t = 0;
     const obs =
       typeof IntersectionObserver !== "undefined"
         ? new IntersectionObserver(
             () => {
               clearTimeout(t);
-              t = window.setTimeout(() => setDynamicBias(checkHidden()), 120);
+              t = window.setTimeout(() => setHiddenNearKeyboard(checkHidden()), 100);
             },
             {
               root: null,
               rootMargin: `0px 0px -${bottomSafeAreaPx + 8}px 0px`,
-              threshold: [0, 0.99, 1],
+              threshold: [0, 1],
             }
           )
         : null;
@@ -69,27 +77,28 @@ export function useActivePlayerViewportBias({
     const el = activeRef.current;
     if (obs && el) obs.observe(el);
 
-    const onResizeScroll = () => {
+    const onVVResize = () => {
       clearTimeout(t);
-      t = window.setTimeout(() => setDynamicBias(checkHidden()), 80);
+      t = window.setTimeout(() => setHiddenNearKeyboard(checkHidden()), 100);
     };
-
-    window.addEventListener("resize", onResizeScroll);
-    window.addEventListener("scroll", onResizeScroll, { passive: true });
-    window.visualViewport?.addEventListener?.("resize", onResizeScroll);
+    window.visualViewport?.addEventListener?.("resize", onVVResize);
 
     return () => {
       clearTimeout(t);
       if (obs && el) obs.unobserve(el);
       obs?.disconnect?.();
-      window.removeEventListener("resize", onResizeScroll);
-      window.removeEventListener("scroll", onResizeScroll);
-      window.visualViewport?.removeEventListener?.("resize", onResizeScroll);
+      window.visualViewport?.removeEventListener?.("resize", onVVResize);
     };
-  }, [enableDynamicBias, bottomSafeAreaPx, currentPlayerId]);
+  }, [bottomSafeAreaPx, currentPlayerId]);
 
+  // Bias:
+  // - alltid i portrett
+  // - i liten landscape
+  // - i stor landscape hvis aktiv spiller er skjult nær keyboard
   const shouldBias =
-    !finished && !!players?.[activeIndex] && (landscapeBias || dynamicBias);
+    !finished &&
+    !!players?.[activeIndex] &&
+    (!isLandscape || isSmallLandscape || hiddenNearKeyboard);
 
   const rotateFrom = (arr, startIdx) => {
     const n = arr?.length ?? 0;
@@ -114,8 +123,7 @@ export function useActivePlayerViewportBias({
     return map;
   }, [playersOrdered, players]);
 
-  const getItemRef = (playerId) =>
-    playerId === currentPlayerId ? activeRef : null;
+  const getItemRef = (playerId) => (playerId === currentPlayerId ? activeRef : null);
 
   return { playersOrdered, orderMap, getItemRef, shouldBias };
 }
