@@ -7,6 +7,7 @@ import {
   Boxes,
   Box,
 } from "../../general/ScoreBoard.styled";
+import { useActiveScrollBias } from "../../../hooks/useActiveScrollBias";
 
 function formatProgress(lives) {
   if (lives <= -2) return "Dead";
@@ -32,18 +33,37 @@ export function KillerScoreBoard({
   currentPlayerId,
   currentThrows,
   lastTurns = {},
+  activeIndex,
+  finished = false,
 }) {
+  const idx =
+    typeof activeIndex === "number"
+      ? activeIndex
+      : Math.max(
+          0,
+          players.findIndex((p) => p.id === currentPlayerId)
+        );
+
+  const { playersOrdered, getItemRef } = useActiveScrollBias({
+    players,
+    activeIndex: idx,
+    finished,
+    currentPlayerId,
+    bottomSafeAreaPx: 260,
+    ordering: "rotate-end",
+  });
+
   return (
     <Board>
       <Cards>
-        {players.map((p) => {
-          const isActive = p.id === currentPlayerId;
+        {playersOrdered.map((p) => {
+          const isActive = p.id === currentPlayerId && !finished;
           const showThrows = isActive
             ? currentThrows || []
             : lastTurns[p.id] || [];
 
           return (
-            <Card key={p.id} data-active={isActive}>
+            <Card key={p.id} data-active={isActive} ref={getItemRef(p.id)}>
               <Score>{p.target}</Score>
               <Name>{p.name}</Name>
               <div>{formatProgress(p.lives)}</div>
