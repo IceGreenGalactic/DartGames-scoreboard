@@ -19,6 +19,7 @@ export const Cards = styled.div`
   @media (orientation: landscape) and (max-height: 520px) {
     grid-template-columns: 1fr;
     gap: 8px;
+    overflow-anchor: none;
   }
 `;
 
@@ -48,6 +49,8 @@ export const Card = styled.div`
     align-items: center;
     gap: 10px;
     padding: 10px 12px;
+    scroll-snap-align: none;
+    scroll-margin-bottom: 0;
   }
 `;
 

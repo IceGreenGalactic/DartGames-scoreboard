@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 export function useActiveScrollBias({
   players,
@@ -8,7 +8,7 @@ export function useActiveScrollBias({
   maxLandscapeHeight = 520,
   bottomSafeAreaPx = 0,
   enableDynamicBias = true,
-  ordering = "rotate-start",
+  ordering = "rotate-end",
 }) {
   const getLandscapeMQ = () =>
     typeof window !== "undefined"
@@ -39,19 +39,24 @@ export function useActiveScrollBias({
 
   const activeRef = useRef(null);
 
+  const checkHidden = () => {
+    const el = activeRef.current;
+    if (!el) return false;
+    const r = el.getBoundingClientRect();
+    const vh = window.visualViewport?.height ?? window.innerHeight;
+    const threshold = vh - bottomSafeAreaPx - 8;
+    return r.bottom > threshold || r.top < 0;
+  };
+
   useEffect(() => {
     if (!enableDynamicBias) return;
     let t = 0;
     const obs =
       typeof IntersectionObserver !== "undefined"
         ? new IntersectionObserver(
-            (entries) => {
-              const e = entries[0];
-              const hidden = !(
-                e?.isIntersecting && e?.intersectionRatio > 0.98
-              );
+            () => {
               clearTimeout(t);
-              t = window.setTimeout(() => setDynamicBias(hidden), 120);
+              t = window.setTimeout(() => setDynamicBias(checkHidden()), 120);
             },
             {
               root: null,
@@ -64,29 +69,22 @@ export function useActiveScrollBias({
     const el = activeRef.current;
     if (obs && el) obs.observe(el);
 
-    const onResize = () => {
+    const onResizeScroll = () => {
       clearTimeout(t);
-      t = window.setTimeout(() => {
-        const el2 = activeRef.current;
-        if (!el2) return;
-        const r = el2.getBoundingClientRect();
-        const vh = window.visualViewport?.height ?? window.innerHeight;
-        const threshold = vh - bottomSafeAreaPx - 8;
-        setDynamicBias(r.bottom > threshold || r.top < 0);
-      }, 80);
+      t = window.setTimeout(() => setDynamicBias(checkHidden()), 80);
     };
 
-    window.addEventListener("resize", onResize);
-    window.addEventListener("scroll", onResize, { passive: true });
-    window.visualViewport?.addEventListener?.("resize", onResize);
+    window.addEventListener("resize", onResizeScroll);
+    window.addEventListener("scroll", onResizeScroll, { passive: true });
+    window.visualViewport?.addEventListener?.("resize", onResizeScroll);
 
     return () => {
       clearTimeout(t);
       if (obs && el) obs.unobserve(el);
       obs?.disconnect?.();
-      window.removeEventListener("resize", onResize);
-      window.removeEventListener("scroll", onResize);
-      window.visualViewport?.removeEventListener?.("resize", onResize);
+      window.removeEventListener("resize", onResizeScroll);
+      window.removeEventListener("scroll", onResizeScroll);
+      window.visualViewport?.removeEventListener?.("resize", onResizeScroll);
     };
   }, [enableDynamicBias, bottomSafeAreaPx, currentPlayerId]);
 
@@ -94,8 +92,8 @@ export function useActiveScrollBias({
     !finished && !!players?.[activeIndex] && (landscapeBias || dynamicBias);
 
   const rotateFrom = (arr, startIdx) => {
-    const n = arr.length;
-    if (!n) return arr;
+    const n = arr?.length ?? 0;
+    if (!n) return [];
     const i = ((startIdx % n) + n) % n;
     return arr.slice(i).concat(arr.slice(0, i));
   };
@@ -109,29 +107,15 @@ export function useActiveScrollBias({
     return players.filter((p) => p.id !== active.id).concat(active);
   }, [players, activeIndex, shouldBias, ordering]);
 
-  const prevBiasRef = useRef(shouldBias);
-  useLayoutEffect(() => {
-    const becameTrue = !prevBiasRef.current && shouldBias;
-    prevBiasRef.current = shouldBias;
-    if (!shouldBias || !activeRef.current) return;
-    activeRef.current.scrollIntoView({
-      behavior: becameTrue ? "auto" : "auto",
-      block: "end",
-      inline: "nearest",
-    });
-  }, [currentPlayerId, shouldBias]);
-
-  useEffect(() => {
-    if (shouldBias || !activeRef.current) return;
-    activeRef.current.scrollIntoView({
-      behavior: "smooth",
-      block: "nearest",
-      inline: "nearest",
-    });
-  }, [currentPlayerId, shouldBias]);
+  const orderMap = useMemo(() => {
+    const base = playersOrdered?.length ? playersOrdered : players || [];
+    const map = new Map();
+    for (let i = 0; i < base.length; i++) map.set(base[i].id, i);
+    return map;
+  }, [playersOrdered, players]);
 
   const getItemRef = (playerId) =>
     playerId === currentPlayerId ? activeRef : null;
 
-  return { playersOrdered, getItemRef, shouldBias };
+  return { playersOrdered, orderMap, getItemRef, shouldBias };
 }
