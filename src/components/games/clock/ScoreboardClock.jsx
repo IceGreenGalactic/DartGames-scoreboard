@@ -38,6 +38,8 @@ export function ClockScoreBoard({ ...props }) {
     activeIndex,
     finished: !!finished,
     currentPlayerId,
+    bottomSafeAreaPx: 260,
+    ordering: "rotate-end",
   });
 
   const clockBonusTick = useGameStore((s) => s.clockBonusTick);

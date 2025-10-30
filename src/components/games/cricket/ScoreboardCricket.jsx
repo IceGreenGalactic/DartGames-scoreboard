@@ -54,6 +54,8 @@ export function CricketScoreBoard({ ...props }) {
     activeIndex,
     finished: false,
     currentPlayerId,
+    bottomSafeAreaPx: 260,
+    ordering: "rotate-end",
   });
   return (
     <Board>

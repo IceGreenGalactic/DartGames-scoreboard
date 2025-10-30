@@ -42,6 +42,8 @@ export function ScoreBoard({
     activeIndex,
     finished: !!finished,
     currentPlayerId,
+    bottomSafeAreaPx: 260,
+  ordering: "rotate-end",
   });
 
   return (
