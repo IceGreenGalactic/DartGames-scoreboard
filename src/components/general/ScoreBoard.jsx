@@ -43,7 +43,7 @@ export function ScoreBoard({
     finished: !!finished,
     currentPlayerId,
     bottomSafeAreaPx: 260,
-  ordering: "rotate-end",
+    ordering: "rotate-end",
   });
 
   return (
@@ -72,6 +72,7 @@ export function ScoreBoard({
               key={p.id}
               data-active={isActive}
               data-winner={isWinner}
+              data-placed={pos >= 0 || isPendingWinner ? "true" : undefined}
               ref={getItemRef(p.id)}
             >
               {badgeText && <Badge>{badgeText}</Badge>}

@@ -56,6 +56,7 @@ export function ClockScoreBoard({ ...props }) {
           const isPendingWinner = winnerId && winnerId === p.id && pos === -1;
           const pendingPlace = (Array.isArray(podium) ? podium.length : 0) + 1;
           const showWinner = winnerId && winnerId === p.id;
+
           const badge =
             pos >= 0
               ? pos === 0
@@ -78,6 +79,7 @@ export function ClockScoreBoard({ ...props }) {
               data-active={isActive}
               data-bonus={isActive && bonusActive}
               data-winner={pos === 0 || showWinner}
+              data-placed={pos >= 0 || isPendingWinner ? "true" : undefined}
               ref={getItemRef(p.id)}
             >
               <Name>

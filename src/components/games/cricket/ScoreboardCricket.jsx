@@ -81,6 +81,7 @@ export function CricketScoreBoard(props) {
               key={p.id}
               data-active={isActive}
               data-winner={pos === 0 || showWinner}
+              data-placed={pos >= 0 || showWinner ? "true" : undefined}
               ref={getItemRef(p.id)}
             >
               <Name>

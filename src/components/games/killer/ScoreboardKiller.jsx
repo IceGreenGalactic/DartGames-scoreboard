@@ -61,19 +61,32 @@ export function KillerScoreBoard({
           const showThrows = isActive
             ? currentThrows || []
             : lastTurns[p.id] || [];
+          const state =
+            p.lives <= -2
+              ? "dead"
+              : p.lives === -1
+              ? "warning"
+              : p.lives >= 3
+              ? "killer"
+              : undefined;
 
           return (
-            <Card key={p.id} data-active={isActive} ref={getItemRef(p.id)}>
+            <Card
+              key={p.id}
+              data-active={isActive}
+              data-state={state}
+              ref={getItemRef(p.id)}
+            >
               <Score>{p.target}</Score>
               <Name>{p.name}</Name>
-              <div>{formatProgress(p.lives)}</div>
+              <div data-role="progress">{formatProgress(p.lives)}</div>
               <Boxes>
                 {Array.from({ length: 3 }, (_, i) => {
                   const t = showThrows[i];
                   return <Box key={i}>{sumThrow(t)}</Box>;
                 })}
               </Boxes>
-              {p.kills > 0 && <div>Kills: {p.kills}</div>}
+              {p.kills > 0 && <div data-role="kills">Kills: {p.kills}</div>}
             </Card>
           );
         })}
