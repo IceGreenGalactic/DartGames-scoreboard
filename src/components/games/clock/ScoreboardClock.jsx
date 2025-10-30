@@ -1,4 +1,5 @@
 import { useGameStore } from "../../../store";
+import { useActiveScrollBias } from "../../../hooks/useActiveScrollBias";
 import {
   Board,
   Cards,
@@ -19,17 +20,26 @@ function formatThrowLabel(t) {
   return String(t.value);
 }
 
-export function ClockScoreBoard({
-  currentPlayerId,
-  currentThrows,
-  players,
-  activeIndex,
-  scores,
-  lastTurns,
-  finished,
-  winnerId,
-  podium,
-}) {
+export function ClockScoreBoard({ ...props }) {
+  const {
+    currentPlayerId,
+    currentThrows,
+    players,
+    activeIndex,
+    scores,
+    lastTurns,
+    finished,
+    winnerId,
+    podium,
+  } = props;
+
+  const { playersOrdered, getItemRef } = useActiveScrollBias({
+    players,
+    activeIndex,
+    finished: !!finished,
+    currentPlayerId,
+  });
+
   const clockBonusTick = useGameStore((s) => s.clockBonusTick);
   const bonusActive =
     clockBonusTick && Date.now() - clockBonusTick < 2400 ? true : false;
@@ -37,21 +47,23 @@ export function ClockScoreBoard({
   return (
     <Board>
       <Cards>
-        {players.map((p, i) => {
-          const isActive = i === activeIndex;
-          const throws =
-            p.id === currentPlayerId ? currentThrows : lastTurns[p.id] || [];
+        {playersOrdered.map((p) => {
+          const isActive = p.id === currentPlayerId && !finished;
+          const throws = isActive ? currentThrows : lastTurns[p.id] || [];
           const pos = Array.isArray(podium) ? podium.indexOf(p.id) : -1;
           const isPendingWinner = winnerId && winnerId === p.id && pos === -1;
           const pendingPlace = (Array.isArray(podium) ? podium.length : 0) + 1;
           const showWinner = winnerId && winnerId === p.id;
-
-          let badge = null;
-          if (pos >= 0) {
-            badge = pos === 0 ? "Winner" : `${pos + 1}. place`;
-          } else if (showWinner) {
-            badge = pendingPlace === 1 ? "Winner" : `${pendingPlace}. place`;
-          }
+          const badge =
+            pos >= 0
+              ? pos === 0
+                ? "Winner"
+                : `${pos + 1}. place`
+              : showWinner
+              ? pendingPlace === 1
+                ? "Winner"
+                : `${pendingPlace}. place`
+              : null;
 
           const paddedThrows = [
             ...throws.map(formatThrowLabel),
@@ -64,6 +76,7 @@ export function ClockScoreBoard({
               data-active={isActive}
               data-bonus={isActive && bonusActive}
               data-winner={pos === 0 || showWinner}
+              ref={getItemRef(p.id)}
             >
               <Name>
                 {p.name}

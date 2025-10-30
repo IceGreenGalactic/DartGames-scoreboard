@@ -1,3 +1,4 @@
+import { useActiveScrollBias } from "../../../hooks/useActiveScrollBias";
 import {
   Board,
   Cards,
@@ -35,21 +36,29 @@ function formatThrowLabel(t) {
   return String(t.value);
 }
 
-export function CricketScoreBoard({
-  players,
-  currentPlayerId,
-  activeIndex,
-  scores,
-  marks,
-  lastTurns,
-  currentThrows,
-  winnerId,
-  podium,
-}) {
+export function CricketScoreBoard({ ...props }) {
+  const {
+    players,
+    currentPlayerId,
+    activeIndex,
+    scores,
+    marks,
+    lastTurns,
+    currentThrows,
+    winnerId,
+    podium,
+  } = props;
+
+  const { playersOrdered, getItemRef } = useActiveScrollBias({
+    players,
+    activeIndex,
+    finished: false,
+    currentPlayerId,
+  });
   return (
     <Board>
       <Cards>
-        {players.map((p, i) => {
+        {playersOrdered.map((p) => {
           const pos = Array.isArray(podium) ? podium.indexOf(p.id) : -1;
           const showWinner = winnerId && winnerId === p.id;
           const badge =
@@ -62,7 +71,7 @@ export function CricketScoreBoard({
               : null;
 
           const m = (marks && marks[p.id]) || {};
-          const isActive = i === activeIndex && p.id === currentPlayerId;
+          const isActive = p.id === currentPlayerId;
           const throws = isActive ? currentThrows || [] : lastTurns[p.id] || [];
           const padded = [
             ...throws.map(formatThrowLabel),
@@ -72,14 +81,14 @@ export function CricketScoreBoard({
           return (
             <Card
               key={p.id}
-              data-active={i === activeIndex}
+              data-active={isActive}
               data-winner={pos === 0 || showWinner}
+              ref={getItemRef(p.id)}
             >
               <Name>
                 {p.name}
                 {badge ? <Badge>{badge}</Badge> : null}
               </Name>
-
               <MarksGrid>
                 {CRICKET_ORDER.map((k) => (
                   <MarkRow key={k}>
@@ -90,7 +99,6 @@ export function CricketScoreBoard({
                   </MarkRow>
                 ))}
               </MarksGrid>
-
               <ThrowsBoxes as={Boxes}>
                 {padded.map((label, idx) => (
                   <Box key={idx}>{label}</Box>

@@ -9,7 +9,7 @@ import {
   RoundSum,
   Badge,
 } from "./ScoreBoard.styled";
-import { useEffect, useRef, useLayoutEffect } from "react";
+import { useActiveScrollBias } from "../../hooks/useActiveScrollBias";
 
 function sumThrow(t) {
   if (!t) return 0;
@@ -32,58 +32,22 @@ export function ScoreBoard({
   podium = [],
   winnerId,
 }) {
-  function sumThrow(t) {
-    if (!t) return 0;
-    if (t.value === 0) return 0;
-    if (t.value === 25) return t.mult === 2 ? 50 : 25;
-    return (t.value || 0) * (t.mult || 1);
-  }
-  function sumThrows(arr) {
-    return (arr || []).reduce((s, t) => s + sumThrow(t), 0);
-  }
   function placeOf(id) {
     const i = podium.indexOf(id);
     return i >= 0 ? i + 1 : null;
   }
 
-  const activeRef = useRef(null);
-
-  const shouldBiasActiveToBottom =
-    typeof window !== "undefined" &&
-    window.matchMedia("(orientation: landscape) and (max-height: 520px)")
-      .matches;
-
-  let orderedPlayers = [...players];
-  let didReorder = false;
-
-  if (shouldBiasActiveToBottom && !finished && players[activeIndex]) {
-    const active = players[activeIndex];
-    didReorder = true;
-    orderedPlayers = players.filter((p) => p.id !== active.id).concat(active);
-  }
-
-  useLayoutEffect(() => {
-    if (!didReorder || !activeRef.current) return;
-    activeRef.current.scrollIntoView({
-      behavior: "auto",
-      block: "end",
-      inline: "nearest",
-    });
-  }, [currentPlayerId, shouldBiasActiveToBottom]);
-
-  useEffect(() => {
-    if (didReorder || !activeRef.current) return;
-    activeRef.current.scrollIntoView({
-      behavior: "smooth",
-      block: "nearest",
-      inline: "nearest",
-    });
-  }, [currentPlayerId, shouldBiasActiveToBottom]);
+  const { playersOrdered, getItemRef } = useActiveScrollBias({
+    players,
+    activeIndex,
+    finished: !!finished,
+    currentPlayerId,
+  });
 
   return (
     <Board>
       <Cards>
-        {orderedPlayers.map((p) => {
+        {playersOrdered.map((p) => {
           const isActive = p.id === currentPlayerId && !finished;
           const showThrows = isActive ? currentThrows : lastTurns[p.id] || [];
           const roundTotal = sumThrows(showThrows);
@@ -106,7 +70,7 @@ export function ScoreBoard({
               key={p.id}
               data-active={isActive}
               data-winner={isWinner}
-              ref={isActive ? activeRef : null}
+              ref={getItemRef(p.id)}
             >
               {badgeText && <Badge>{badgeText}</Badge>}
               <Score>{scores[p.id] ?? 0}</Score>
