@@ -58,6 +58,8 @@ export function PlayPage() {
   const eliminationLog = useGameStore((s) => s.eliminationLog);
   const runtimePerPlayer = useGameStore((s) => s.runtime?.perPlayer);
   const cricketMarks = useGameStore((s) => s.cricketMarks);
+  const reserveHint = gameId === "501" || gameId === "301";
+  const showHint = Array.isArray(checkoutHint) && checkoutHint.length > 0;
 
   const throwDart =
     gameId === "killer"
@@ -185,16 +187,17 @@ export function PlayPage() {
           podium={podium}
         />
       )}
-
-      <HintArea>
-        {Array.isArray(checkoutHint) && checkoutHint.length > 0 && (
-          <HintBar>
-            {checkoutHint.map((step, i) => (
-              <HintSteps key={i}>{step}</HintSteps>
-            ))}
-          </HintBar>
-        )}
-      </HintArea>
+      {reserveHint && (
+        <HintArea>
+          {showHint && (
+            <HintBar>
+              {checkoutHint.map((step, i) => (
+                <HintSteps key={i}>{step}</HintSteps>
+              ))}
+            </HintBar>
+          )}
+        </HintArea>
+      )}
 
       <Keyboard
         onThrow={throwDart}
