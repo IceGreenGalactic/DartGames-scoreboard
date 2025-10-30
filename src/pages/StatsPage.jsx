@@ -15,6 +15,8 @@ import {
   TBody,
   Tr,
   Td,
+  ResponsiveHide,
+  InfoBar,
 } from "./StatsPage.styled";
 
 const defaultX01 = {
@@ -181,162 +183,176 @@ export default function StatsPage() {
 
       <Section>
         <H3>Overall</H3>
-        <Table>
-          <THead>
-            <Tr>
-              <Th>Spiller</Th>
-              <Th>Plays</Th>
-              <Th>Wins</Th>
-              <Th>Win%</Th>
-            </Tr>
-          </THead>
-          <TBody>
-            {overall.map((r) => (
-              <Tr key={r.player}>
-                <Td>{r.player}</Td>
-                <Td>{r.plays}</Td>
-                <Td>{r.wins}</Td>
-                <Td>{r.winPct}</Td>
+        <InfoBar>For more stats, turn device to landscape 📊</InfoBar>
+
+        <ResponsiveHide>
+          <Table>
+            <THead>
+              <Tr>
+                <Th>Spiller</Th>
+                <Th>Plays</Th>
+                <Th>Wins</Th>
+                <Th>Win%</Th>
               </Tr>
-            ))}
-          </TBody>
-        </Table>
+            </THead>
+            <TBody>
+              {overall.map((r) => (
+                <Tr key={r.player}>
+                  <Td>{r.player}</Td>
+                  <Td>{r.plays}</Td>
+                  <Td>{r.wins}</Td>
+                  <Td>{r.winPct}</Td>
+                </Tr>
+              ))}
+            </TBody>
+          </Table>
+        </ResponsiveHide>
       </Section>
 
       <Section>
         <H3>501</H3>
-        <Table>
-          <THead>
-            <Tr>
-              <Th>Spiller</Th>
-              <Th>Plays</Th>
-              <Th>Wins</Th>
-              <Th>Win%</Th>
-              <Th>Best Turn</Th>
-              <Th>Fewest Darts</Th>
-            </Tr>
-          </THead>
-          <TBody>
-            {rows501.map((r) => (
-              <Tr key={r.player}>
-                <Td>{r.player}</Td>
-                <Td>{r.plays}</Td>
-                <Td>{r.wins}</Td>
-                <Td>{r.winPct}</Td>
-                <Td>{r.bestTurn}</Td>
-                <Td>{r.fewestDarts}</Td>
+        <ResponsiveHide>
+          <Table>
+            <THead>
+              <Tr>
+                <Th>Spiller</Th>
+                <Th>Plays</Th>
+                <Th>Wins</Th>
+                <Th>Win%</Th>
+                <Th>Best Turn</Th>
+                <Th>Fewest Darts</Th>
               </Tr>
-            ))}
-          </TBody>
-        </Table>
+            </THead>
+            <TBody>
+              {rows501.map((r) => (
+                <Tr key={r.player}>
+                  <Td>{r.player}</Td>
+                  <Td>{r.plays}</Td>
+                  <Td>{r.wins}</Td>
+                  <Td>{r.winPct}</Td>
+                  <Td>{r.bestTurn}</Td>
+                  <Td>{r.fewestDarts}</Td>
+                </Tr>
+              ))}
+            </TBody>
+          </Table>
+        </ResponsiveHide>
       </Section>
 
       <Section>
         <H3>301</H3>
-        <Table>
-          <THead>
-            <Tr>
-              <Th>Spiller</Th>
-              <Th>Plays</Th>
-              <Th>Wins</Th>
-              <Th>Win%</Th>
-              <Th>Best Turn</Th>
-              <Th>Fewest Darts</Th>
-            </Tr>
-          </THead>
-          <TBody>
-            {rows301.map((r) => (
-              <Tr key={r.player}>
-                <Td>{r.player}</Td>
-                <Td>{r.plays}</Td>
-                <Td>{r.wins}</Td>
-                <Td>{r.winPct}</Td>
-                <Td>{r.bestTurn}</Td>
-                <Td>{r.fewestDarts}</Td>
+        <ResponsiveHide>
+          <Table>
+            <THead>
+              <Tr>
+                <Th>Spiller</Th>
+                <Th>Plays</Th>
+                <Th>Wins</Th>
+                <Th>Win%</Th>
+                <Th>Best Turn</Th>
+                <Th>Fewest Darts</Th>
               </Tr>
-            ))}
-          </TBody>
-        </Table>
+            </THead>
+            <TBody>
+              {rows301.map((r) => (
+                <Tr key={r.player}>
+                  <Td>{r.player}</Td>
+                  <Td>{r.plays}</Td>
+                  <Td>{r.wins}</Td>
+                  <Td>{r.winPct}</Td>
+                  <Td>{r.bestTurn}</Td>
+                  <Td>{r.fewestDarts}</Td>
+                </Tr>
+              ))}
+            </TBody>
+          </Table>
+        </ResponsiveHide>
       </Section>
 
       <Section>
         <H3>Killer</H3>
-        <Table>
-          <THead>
-            <Tr>
-              <Th>Spiller</Th>
-              <Th>Plays</Th>
-              <Th>Wins</Th>
-              <Th>Win%</Th>
-              <Th>Best Kills</Th>
-              <Th>Total Kills</Th>
-            </Tr>
-          </THead>
-          <TBody>
-            {rowsKiller.map((r) => (
-              <Tr key={r.player}>
-                <Td>{r.player}</Td>
-                <Td>{r.plays}</Td>
-                <Td>{r.wins}</Td>
-                <Td>{r.winPct}</Td>
-                <Td>{r.bestKills}</Td>
-                <Td>{r.totalKills}</Td>
+        <ResponsiveHide>
+          <Table>
+            <THead>
+              <Tr>
+                <Th>Spiller</Th>
+                <Th>Plays</Th>
+                <Th>Wins</Th>
+                <Th>Win%</Th>
+                <Th>Best Kills</Th>
+                <Th>Total Kills</Th>
               </Tr>
-            ))}
-          </TBody>
-        </Table>
+            </THead>
+            <TBody>
+              {rowsKiller.map((r) => (
+                <Tr key={r.player}>
+                  <Td>{r.player}</Td>
+                  <Td>{r.plays}</Td>
+                  <Td>{r.wins}</Td>
+                  <Td>{r.winPct}</Td>
+                  <Td>{r.bestKills}</Td>
+                  <Td>{r.totalKills}</Td>
+                </Tr>
+              ))}
+            </TBody>
+          </Table>
+        </ResponsiveHide>
       </Section>
 
       <Section>
         <H3>Around the Clock</H3>
-        <Table>
-          <THead>
-            <Tr>
-              <Th>Spiller</Th>
-              <Th>Plays</Th>
-              <Th>Wins</Th>
-              <Th>Win%</Th>
-              <Th>Raskest (darts)</Th>
-            </Tr>
-          </THead>
-          <TBody>
-            {rowsATC.map((r) => (
-              <Tr key={r.player}>
-                <Td>{r.player}</Td>
-                <Td>{r.plays}</Td>
-                <Td>{r.wins}</Td>
-                <Td>{r.winPct}</Td>
-                <Td>{r.fastest}</Td>
+        <ResponsiveHide>
+          <Table>
+            <THead>
+              <Tr>
+                <Th>Spiller</Th>
+                <Th>Plays</Th>
+                <Th>Wins</Th>
+                <Th>Win%</Th>
+                <Th>Raskest (darts)</Th>
               </Tr>
-            ))}
-          </TBody>
-        </Table>
+            </THead>
+            <TBody>
+              {rowsATC.map((r) => (
+                <Tr key={r.player}>
+                  <Td>{r.player}</Td>
+                  <Td>{r.plays}</Td>
+                  <Td>{r.wins}</Td>
+                  <Td>{r.winPct}</Td>
+                  <Td>{r.fastest}</Td>
+                </Tr>
+              ))}
+            </TBody>
+          </Table>
+        </ResponsiveHide>
       </Section>
 
       <Section>
         <H3>Cricket</H3>
-        <Table>
-          <THead>
-            <Tr>
-              <Th>Spiller</Th>
-              <Th>Plays</Th>
-              <Th>Wins</Th>
-              <Th>Win%</Th>
-              <Th>Mest lukket (0–7)</Th>
-            </Tr>
-          </THead>
-          <TBody>
-            {rowsCricket.map((r) => (
-              <Tr key={r.player}>
-                <Td>{r.player}</Td>
-                <Td>{r.plays}</Td>
-                <Td>{r.wins}</Td>
-                <Td>{r.winPct}</Td>
-                <Td>{r.mostClosed}</Td>
+        <ResponsiveHide>
+          <Table>
+            <THead>
+              <Tr>
+                <Th>Spiller</Th>
+                <Th>Plays</Th>
+                <Th>Wins</Th>
+                <Th>Win%</Th>
+                <Th>Mest lukket (0–7)</Th>
               </Tr>
-            ))}
-          </TBody>
-        </Table>
+            </THead>
+            <TBody>
+              {rowsCricket.map((r) => (
+                <Tr key={r.player}>
+                  <Td>{r.player}</Td>
+                  <Td>{r.plays}</Td>
+                  <Td>{r.wins}</Td>
+                  <Td>{r.winPct}</Td>
+                  <Td>{r.mostClosed}</Td>
+                </Tr>
+              ))}
+            </TBody>
+          </Table>
+        </ResponsiveHide>
       </Section>
     </Wrapper>
   );
