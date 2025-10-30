@@ -9,7 +9,7 @@ import {
   RoundSum,
   Badge,
 } from "./ScoreBoard.styled";
-import { useActiveScrollBias } from "../../hooks/useActiveScrollBias";
+import { useActivePlayerViewportBias } from "../../hooks/useActivePlayerViewportBias";
 
 function sumThrow(t) {
   if (!t) return 0;
@@ -37,7 +37,7 @@ export function ScoreBoard({
     return i >= 0 ? i + 1 : null;
   }
 
-  const { playersOrdered, getItemRef } = useActiveScrollBias({
+  const { playersOrdered, getItemRef } = useActivePlayerViewportBias({
     players,
     activeIndex,
     finished: !!finished,

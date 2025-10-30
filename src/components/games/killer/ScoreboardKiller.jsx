@@ -7,7 +7,7 @@ import {
   Boxes,
   Box,
 } from "../../general/ScoreBoard.styled";
-import { useActiveScrollBias } from "../../../hooks/useActiveScrollBias";
+import { useActivePlayerViewportBias } from "../../../hooks/useActivePlayerViewportBias";
 
 function formatProgress(lives) {
   if (lives <= -2) return "Dead";
@@ -44,7 +44,7 @@ export function KillerScoreBoard({
           players.findIndex((p) => p.id === currentPlayerId)
         );
 
-  const { playersOrdered, getItemRef } = useActiveScrollBias({
+  const { playersOrdered, getItemRef } = useActivePlayerViewportBias({
     players,
     activeIndex: idx,
     finished,

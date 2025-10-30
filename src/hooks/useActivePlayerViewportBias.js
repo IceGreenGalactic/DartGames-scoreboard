@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
-export function useActiveScrollBias({
+export function useActivePlayerViewportBias({
   players,
   activeIndex,
   finished = false,

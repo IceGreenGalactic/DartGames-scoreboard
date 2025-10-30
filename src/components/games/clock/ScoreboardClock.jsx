@@ -1,5 +1,5 @@
 import { useGameStore } from "../../../store";
-import { useActiveScrollBias } from "../../../hooks/useActiveScrollBias";
+import { useActivePlayerViewportBias } from "../../../hooks/useActivePlayerViewportBias";
 import {
   Board,
   Cards,
@@ -33,7 +33,7 @@ export function ClockScoreBoard({ ...props }) {
     podium,
   } = props;
 
-  const { playersOrdered, getItemRef } = useActiveScrollBias({
+  const { playersOrdered, getItemRef } = useActivePlayerViewportBias({
     players,
     activeIndex,
     finished: !!finished,

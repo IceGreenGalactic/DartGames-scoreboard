@@ -1,4 +1,4 @@
-import { useActiveScrollBias } from "../../../hooks/useActiveScrollBias";
+import { useActivePlayerViewportBias } from "../../../hooks/useActivePlayerViewportBias";
 import { Name, Boxes, Box, Badge } from "../../general/ScoreBoard.styled";
 import { CRICKET_ORDER } from "../../../store/lib/cricketCore";
 import {
@@ -44,7 +44,7 @@ export function CricketScoreBoard(props) {
     podium,
   } = props;
 
-  const { playersOrdered, getItemRef } = useActiveScrollBias({
+  const { playersOrdered, getItemRef } = useActivePlayerViewportBias({
     players,
     activeIndex,
     finished: false,
