@@ -37,18 +37,19 @@ export function ScoreBoard({
     return i >= 0 ? i + 1 : null;
   }
 
-  const { playersOrdered, getItemRef } = useActivePlayerViewportBias({
-    players,
-    activeIndex,
-    finished: !!finished,
-    currentPlayerId,
-    bottomSafeAreaPx: 260,
-    ordering: "rotate-end",
-  });
+  const { playersOrdered, getItemRef, getListRef } =
+    useActivePlayerViewportBias({
+      players,
+      activeIndex,
+      finished: !!finished,
+      currentPlayerId,
+      bottomSafeAreaPx: 260,
+      ordering: "rotate-end",
+    });
 
   return (
     <Board>
-      <Cards>
+      <Cards ref={getListRef()}>
         {playersOrdered.map((p) => {
           const isActive = p.id === currentPlayerId && !finished;
           const showThrows = isActive ? currentThrows : lastTurns[p.id] || [];

@@ -44,18 +44,19 @@ export function CricketScoreBoard(props) {
     podium,
   } = props;
 
-  const { playersOrdered, getItemRef } = useActivePlayerViewportBias({
-    players,
-    activeIndex,
-    finished: false,
-    currentPlayerId,
-    bottomSafeAreaPx: 260,
-    ordering: "rotate-end",
-  });
+  const { playersOrdered, getItemRef, getListRef } =
+    useActivePlayerViewportBias({
+      players,
+      activeIndex,
+      finished: false,
+      currentPlayerId,
+      bottomSafeAreaPx: 260,
+      ordering: "rotate-end",
+    });
 
   return (
     <Board>
-      <Cards>
+      <Cards ref={getListRef()}>
         {playersOrdered.map((p) => {
           const pos = Array.isArray(podium) ? podium.indexOf(p.id) : -1;
           const showWinner = winnerId && winnerId === p.id;

@@ -46,64 +46,73 @@ export function useActivePlayerViewportBias({
       setIsLandscape(e.matches ?? e.currentTarget?.matches ?? false);
     const onS = (e) =>
       setIsSmallLandscape(e.matches ?? e.currentTarget?.matches ?? false);
-
     if (lmq.addEventListener) lmq.addEventListener("change", onL);
     else lmq.addListener(onL);
-
     if (smq.addEventListener) smq.addEventListener("change", onS);
     else smq.addListener(onS);
-
     return () => {
       if (lmq.removeEventListener) lmq.removeEventListener("change", onL);
       else lmq.removeListener(onL);
-
       if (smq.removeEventListener) smq.removeEventListener("change", onS);
       else smq.removeListener(onS);
     };
   }, [maxLandscapeHeight]);
 
   const activeRef = useRef(null);
+  const listRef = useRef(null);
   const getItemRef = (playerId) =>
     playerId === currentPlayerId ? activeRef : null;
+  const getListRef = () => listRef;
 
   const [needBiasForTurn, setNeedBiasForTurn] = useState(false);
+  const [listTooTall, setListTooTall] = useState(false);
 
   useEffect(() => {
     if (finished || !players?.[activeIndex]) {
       setNeedBiasForTurn(false);
+      setListTooTall(false);
       return;
     }
 
-    if (!isLandscape || isSmallLandscape) {
-      setNeedBiasForTurn(true);
-      return;
-    }
-
-    let raf1 = 0,
-      raf2 = 0;
+    let r1 = 0,
+      r2 = 0;
     const measure = () => {
       const el = activeRef.current;
-      if (!el) {
-        setNeedBiasForTurn(false);
-        return;
+      const list = listRef.current;
+
+      const vv = window.visualViewport;
+      const vh = vv?.height ?? window.innerHeight;
+      const vTop = vv?.offsetTop ?? 0;
+      const vBottom = vTop + vh;
+      const bottomLimit = vBottom - 8;
+
+      let fitsAll = false;
+      if (list) {
+        const rl = list.getBoundingClientRect();
+        fitsAll = rl.top >= vTop && rl.bottom <= bottomLimit;
       }
-      const r = el.getBoundingClientRect();
-      const vh = window.visualViewport?.height ?? window.innerHeight;
-      const bottomLimit = vh - bottomSafeAreaPx - 8;
-      const margin = 24;
-      const tooLow = r.bottom > bottomLimit;
-      const tooHigh = r.top < 0;
-      const notNearBottom = r.bottom < bottomLimit - margin;
-      setNeedBiasForTurn(tooLow || tooHigh || notNearBottom);
+
+      let need = false;
+      if (!fitsAll && el) {
+        const re = el.getBoundingClientRect();
+        const band = 28;
+        const inBand =
+          re.bottom >= bottomLimit - band - bottomSafeAreaPx &&
+          re.bottom <= bottomLimit;
+        const offscreen = re.bottom > bottomLimit || re.top < vTop;
+        need = offscreen || !inBand;
+      }
+
+      setListTooTall(!fitsAll);
+      setNeedBiasForTurn(need);
     };
 
-    raf1 = requestAnimationFrame(() => {
-      raf2 = requestAnimationFrame(measure);
+    r1 = requestAnimationFrame(() => {
+      r2 = requestAnimationFrame(measure);
     });
-
     return () => {
-      cancelAnimationFrame(raf1);
-      cancelAnimationFrame(raf2);
+      cancelAnimationFrame(r1);
+      cancelAnimationFrame(r2);
     };
   }, [
     activeIndex,
@@ -116,9 +125,7 @@ export function useActivePlayerViewportBias({
   ]);
 
   const shouldBias =
-    !finished &&
-    !!players?.[activeIndex] &&
-    (!!needBiasForTurn || !isLandscape || isSmallLandscape);
+    !finished && !!players?.[activeIndex] && listTooTall && needBiasForTurn;
 
   const rotateFrom = (arr, startIdx) => {
     const n = arr?.length ?? 0;
@@ -143,5 +150,5 @@ export function useActivePlayerViewportBias({
     return map;
   }, [playersOrdered, players]);
 
-  return { playersOrdered, orderMap, getItemRef, shouldBias };
+  return { playersOrdered, orderMap, getItemRef, getListRef, shouldBias };
 }

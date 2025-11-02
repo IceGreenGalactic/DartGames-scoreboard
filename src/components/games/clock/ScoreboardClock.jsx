@@ -33,14 +33,15 @@ export function ClockScoreBoard({ ...props }) {
     podium,
   } = props;
 
-  const { playersOrdered, getItemRef } = useActivePlayerViewportBias({
-    players,
-    activeIndex,
-    finished: !!finished,
-    currentPlayerId,
-    bottomSafeAreaPx: 260,
-    ordering: "rotate-end",
-  });
+  const { playersOrdered, getItemRef, getListRef } =
+    useActivePlayerViewportBias({
+      players,
+      activeIndex,
+      finished: !!finished,
+      currentPlayerId,
+      bottomSafeAreaPx: 260,
+      ordering: "rotate-end",
+    });
 
   const clockBonusTick = useGameStore((s) => s.clockBonusTick);
   const bonusActive =
@@ -48,7 +49,7 @@ export function ClockScoreBoard({ ...props }) {
 
   return (
     <Board>
-      <Cards>
+      <Cards ref={getListRef()}>
         {playersOrdered.map((p) => {
           const isActive = p.id === currentPlayerId && !finished;
           const throws = isActive ? currentThrows : lastTurns[p.id] || [];
