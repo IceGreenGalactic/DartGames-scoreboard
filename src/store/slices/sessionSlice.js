@@ -45,6 +45,7 @@ export const sessionSlice = (set, get) => ({
       hasLoggedSession: s.hasLoggedSession,
       targetsClock: s.targetsClock,
       mustDoubleOut: s.mustDoubleOut,
+      cricketMarks: s.cricketMarks,
     });
   },
 
@@ -237,8 +238,8 @@ export const sessionSlice = (set, get) => ({
       podium: Array.isArray(s2.podium)
         ? s2.podium.slice()
         : s2.winnerId
-        ? [s2.winnerId]
-        : [],
+          ? [s2.winnerId]
+          : [],
       gameFinishedAt: now,
       currentThrows: [],
       finishTimes: { ...(s2.finishTimes || {}) },
