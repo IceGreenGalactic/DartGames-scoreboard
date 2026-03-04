@@ -25,6 +25,8 @@ export const useGameStore = create(
       name: "dartgames-store",
       storage: createJSONStorage(() => localStorage),
       partialize: (s) => ({
+        players: s.players,
+
         scores: s.scores,
         gameType: s.gameType,
         turn: s.turn,
@@ -33,6 +35,19 @@ export const useGameStore = create(
         status: s.status,
         winnerId: s.winnerId,
         finishedAt: s.finishedAt,
+
+        cricketMarks: s.cricketMarks,
+
+        finishedIds: s.finishedIds,
+        podium: s.podium,
+        finishTimes: s.finishTimes,
+
+        history: s.history,
+        gameStartedAt: s.gameStartedAt,
+        gameFinishedAt: s.gameFinishedAt,
+        checkoutHint: s.checkoutHint,
+        lastBustAt: s.lastBustAt,
+        mustDoubleOut: s.mustDoubleOut,
         recentPlayers: s.recentPlayers,
         selectedPlayers: s.selectedPlayers,
         sessions: s.sessions,
@@ -41,6 +56,6 @@ export const useGameStore = create(
         clock: s.clock,
       }),
       version: 4,
-    }
-  )
+    },
+  ),
 );
