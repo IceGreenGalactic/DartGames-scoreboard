@@ -22,6 +22,7 @@ export const sessionSlice = (set, get) => ({
   hasLoggedSession: false,
   mustDoubleOut: null,
   runtime: null,
+  inputLockUntil: 0,
 
   snapshot() {
     const s = get();
@@ -76,7 +77,9 @@ export const sessionSlice = (set, get) => ({
       x01Start: null,
     });
   },
-
+  setInputLockUntil(ts) {
+    set({ inputLockUntil: ts });
+  },
   startGame(gameId, names, numbers, options) {
     const s = get();
 

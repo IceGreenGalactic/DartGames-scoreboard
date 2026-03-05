@@ -24,6 +24,7 @@ import { useGameStore } from "../store";
 import { rulesByGame } from "../components/rules";
 import { WinnerModal } from "../components/general/WinnerModal";
 import { buildResults, formatResultMeta } from "../store/lib/results";
+import TurnScoreAnnouncer from "../components/general/TurnScoreAnnouncer";
 
 export function PlayPage() {
   const { gameId } = useParams();
@@ -76,6 +77,7 @@ export function PlayPage() {
   if ((!players.length || gameType !== gameId) && !allowKillerSetupView) {
     return (
       <>
+        <TurnScoreAnnouncer enabledGames={["501", "301"]} />
         <Title>
           <h1>
             {games.find((g) => g.id === gameId)?.title ||
@@ -101,8 +103,8 @@ export function PlayPage() {
       ? podium.length + 1
       : podium.length
     : winnerId
-    ? 1
-    : 0;
+      ? 1
+      : 0;
   const currentPlace = decidedCount;
   const nextPlace = currentPlace + 1;
   const remainingAfterWinner = players.length - decidedCount;
@@ -127,6 +129,7 @@ export function PlayPage() {
 
   return (
     <>
+      <TurnScoreAnnouncer enabledGames={["501", "301",]} />
       <Title>
         <div>
           <h1>
@@ -142,7 +145,6 @@ export function PlayPage() {
             : `Player: ${currentPlayer?.name ?? "-"}`}
         </p>
       </Title>
-
       {gameId === "cricket" ? (
         <CricketScoreBoard
           players={players}
@@ -198,14 +200,12 @@ export function PlayPage() {
           )}
         </HintArea>
       )}
-
       <Keyboard
         onThrow={throwDart}
         onUndo={undo}
         disabled={!canThrow}
         bustTick={lastBustAt}
       />
-
       {status === "finished" && (
         <ResultsCard>
           <ResultsHeader>Results</ResultsHeader>
@@ -255,7 +255,6 @@ export function PlayPage() {
           </ResultsActions>
         </ResultsCard>
       )}
-
       <WinnerModal
         open={status === "win_pending"}
         winnerName={winner?.name ?? "-"}
@@ -272,7 +271,6 @@ export function PlayPage() {
           nav("/");
         }}
       />
-
       {gameId === "killer" && (
         <KillerSetupModal
           isOpen={showKillerSetup}
