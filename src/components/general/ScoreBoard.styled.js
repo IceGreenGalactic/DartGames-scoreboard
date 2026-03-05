@@ -12,8 +12,10 @@ export const Board = styled.div`
 
 export const Cards = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 140px));
   gap: 12px;
+
+  justify-content: center;
   overflow-anchor: none;
 
   @media (max-width: 900px) {
@@ -27,6 +29,7 @@ export const Cards = styled.div`
     gap: 8px;
     overflow-anchor: none;
   }
+    
 `;
 
 export const Card = styled.div`
@@ -42,7 +45,26 @@ export const Card = styled.div`
   &[data-active="true"]:not([data-placed="true"]) {
     outline: 2px solid ${({ theme }) => theme.colors.accent};
     box-shadow: 0 0 12px ${({ theme }) => rgba(theme.colors.accent, 0.35)};
+     background: ${({ theme }) => rgba(theme.colors.panel, 0.85)};
   }
+    &[data-active="true"]:not([data-placed="true"])::before {
+  content: "YOUR TURN";
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: ${({ theme }) => theme.colors.accent};
+  color: #081015;
+}
+  &[data-active="true"]:not([data-placed="true"]) [data-role="name"] {
+  color: ${({ theme }) => theme.colors.text};
+  text-decoration:underline;
+  font-weight: 700;
+  text-shadow: 0 0 6px ${({ theme }) => rgba(theme.colors.accent, 0.7)};
+}
 
   &[data-placed="true"] {
     outline: none;
@@ -115,7 +137,7 @@ export const Score = styled.div`
   }
 `;
 
-export const Name = styled.div`
+export const Name = styled.div.attrs({ "data-role": "name" })`
   margin-top: 4px;
   color: ${({ theme }) => theme.colors.muted};
 

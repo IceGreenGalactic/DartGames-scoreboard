@@ -124,7 +124,7 @@ export const Key = styled.button`
     transform: translateY(1px);
     filter: brightness(0.96);
     box-shadow: inset 0 0 0 2px ${({ theme }) => theme.colors.accent},
-      0 1px 0 rgba(0, 0, 0, 0.35);
+      0 1px 20px rgba(182, 148, 148, 1);
   }
 
   @media (hover: hover) and (pointer: fine) {
