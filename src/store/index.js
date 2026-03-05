@@ -8,6 +8,7 @@ import { gameClockSlice } from "./slices/gameClockSlice";
 import { gameCricketSlice } from "./slices/gameCricketSlice";
 import { statsSlice } from "./slices/statsSlice";
 import { themeSlice } from "./slices/themeSlice";
+import { voiceSlice } from "./slices/voiceSlice";
 
 export const useGameStore = create(
   persist(
@@ -19,6 +20,7 @@ export const useGameStore = create(
       ...gameClockSlice(set, get, api),
       ...statsSlice(set, get, api),
       ...themeSlice(set, get, api),
+      ...voiceSlice(set, get),
       ...gameCricketSlice(set, get),
     }),
     {
@@ -54,6 +56,13 @@ export const useGameStore = create(
         stats: s.stats,
         theme: s.theme,
         clock: s.clock,
+
+        ttsEnabled: s.ttsEnabled,
+        ttsLang: s.ttsLang,
+        ttsVoiceURI: s.ttsVoiceURI,
+        ttsRate: s.ttsRate,
+        ttsPitch: s.ttsPitch,
+        ttsVolume: s.ttsVolume,
       }),
       version: 4,
     },

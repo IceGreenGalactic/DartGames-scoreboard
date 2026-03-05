@@ -25,7 +25,7 @@ const SOUND = {
 function ensureCtx() {
   if (ctx) return ctx;
   const AC = window.AudioContext || window.webkitAudioContext;
-  ctx = new AC(); // <- lag ctx først når vi trenger den (fra gesture)
+  ctx = new AC();
 
   Object.entries(SOUND).forEach(([k, v]) => {
     const g = ctx.createGain();
@@ -42,9 +42,12 @@ function resumeOnce() {
   if (c.state === "running") return Promise.resolve();
 
   if (!resumeP) {
-    resumeP = c.resume().catch(() => {}).finally(() => {
-      resumeP = null;
-    });
+    resumeP = c
+      .resume()
+      .catch(() => {})
+      .finally(() => {
+        resumeP = null;
+      });
   }
   return resumeP;
 }
@@ -67,14 +70,13 @@ async function loadBuffer(key) {
 }
 
 export async function sfxPrime() {
-  // kun prime etter unlock/gesture (men trygt å kalle flere ganger)
   ensureCtx();
   await Promise.all(Object.keys(SOUND).map(loadBuffer));
 }
 
 export function sfxUnlock() {
   unlocked = true;
-  resumeOnce(); // kickstart
+  resumeOnce();
 }
 
 function stopAll() {
@@ -91,13 +93,11 @@ function playKey(key, { ignoreMute = false, interrupt = false } = {}) {
   if (!unlocked) return;
   if (!ignoreMute && Date.now() < muteUntil) return;
 
-  // 1) resume først
   if (c.state !== "running") {
     resumeOnce().then(() => playKey(key, { ignoreMute, interrupt }));
     return;
   }
 
-  // 2) lazy-load buffer hvis den mangler
   const buf = buffers.get(key);
   if (!buf) {
     loadBuffer(key).then((b) => {
@@ -141,11 +141,30 @@ export function ttsUnlock() {
 
   try {
     window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance("ready");
-    u.volume = 0; // lydløs unlock
-    u.lang = "en-GB";
+    const u = new SpeechSynthesisUtterance(" ");
+    u.volume = 0;
     window.speechSynthesis.speak(u);
   } catch {}
+}
+// store/lib/sfx.js
+import { useGameStore } from "../index";
+
+function pickVoice(voices, lang, voiceURI) {
+  if (!voices?.length) return null;
+
+  if (voiceURI) {
+    const v = voices.find((x) => x.voiceURI === voiceURI);
+    if (v) return v;
+  }
+
+  const exact = voices.find((v) => v.lang === lang);
+  if (exact) return exact;
+
+  const base = lang?.split("-")[0];
+  const baseMatch = voices.find((v) => v.lang?.startsWith(base));
+  if (baseMatch) return baseMatch;
+
+  return voices.find((v) => v.default) || voices[0];
 }
 
 export function speak(textOrNumber) {
@@ -153,13 +172,24 @@ export function speak(textOrNumber) {
   if (!text) return 0;
   if (!("speechSynthesis" in window)) return 0;
 
-  if (!ttsUnlocked) return 0;  
+  const s = useGameStore.getState();
+  if (s.ttsEnabled === false) return 0;
+
+  const voices = window.speechSynthesis.getVoices();
+  const lang = s.ttsLang || "nb-NO";
 
   try {
     window.speechSynthesis.cancel();
+
     const u = new SpeechSynthesisUtterance(text);
-    u.lang = "en-GB";
-    u.rate = 1;
+    u.lang = lang;
+    u.rate = s.ttsRate ?? 1;
+    u.pitch = s.ttsPitch ?? 1;
+    u.volume = s.ttsVolume ?? 1;
+
+    const v = pickVoice(voices, lang, s.ttsVoiceURI);
+    if (v) u.voice = v;
+
     window.speechSynthesis.speak(u);
   } catch {}
 
