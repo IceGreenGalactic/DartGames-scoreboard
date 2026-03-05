@@ -125,15 +125,17 @@ export const game501Slice = (set, get) => ({
       const nextPlayerIndex = nextAlivePlayerIndex(
         s.players,
         pIndex,
-        finishedSet
+        finishedSet,
       );
       const lastTurns = { ...s.lastTurns, [p.id]: [] };
       const nextPlayer = s.players[nextPlayerIndex];
-      const nextStart = get().scores[nextPlayer.id];
+      const nextScores = { ...s.scores, [p.id]: startScore };
+      const nextStart = nextScores[nextPlayer.id];
+
       const routesNext =
         mustDouble && nextStart > 1 ? findCheckout(nextStart, 3) : [];
       set({
-        scores: { ...s.scores, [p.id]: startScore },
+        scores: nextScores,
         currentThrows: [],
         lastTurns,
         turn: { playerIndex: nextPlayerIndex, dartIndex: 0 },
@@ -160,7 +162,7 @@ export const game501Slice = (set, get) => ({
                 ? 50
                 : 25
               : (x.value || 0) * (x.mult || 1)),
-          0
+          0,
         ),
       });
 
@@ -190,11 +192,12 @@ export const game501Slice = (set, get) => ({
       const nextPlayerIndex = nextAlivePlayerIndex(
         s.players,
         pIndex,
-        finishedSet
+        finishedSet,
       );
       const lastTurns = { ...s.lastTurns, [p.id]: newThrows };
       const nextPlayer = s.players[nextPlayerIndex];
-      const nextStart = get().scores[nextPlayer.id];
+      const nextScores = { ...s.scores, [p.id]: newScore };
+      const nextStart = nextScores[nextPlayer.id];
       const routesNext =
         mustDouble && nextStart > 1 ? findCheckout(nextStart, 3) : [];
       rtOnTurnEnd(get, set, {
@@ -207,12 +210,12 @@ export const game501Slice = (set, get) => ({
                 ? 50
                 : 25
               : (x.value || 0) * (x.mult || 1)),
-          0
+          0,
         ),
       });
 
       set({
-        scores: { ...s.scores, [p.id]: newScore },
+        scores: nextScores,
         currentThrows: [],
         lastTurns,
         turn: { playerIndex: nextPlayerIndex, dartIndex: 0 },
@@ -260,7 +263,7 @@ export const game501Slice = (set, get) => ({
     const nextIndex = nextAlivePlayerIndex(
       s.players,
       s.turn.playerIndex,
-      finished
+      finished,
     );
     const nextStart = get().scores[s.players[nextIndex].id];
     const mustDouble = !!s.mustDoubleOut;
