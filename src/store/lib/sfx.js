@@ -3,6 +3,7 @@ import bullSound from "../../assets/sounds/BullsEye.wav";
 import missSound from "../../assets/sounds/Miss.wav";
 import bustSound from "../../assets/sounds/Bust.wav";
 import activatedSound from "../../assets/sounds/Activated.wav";
+import winSound from "../../assets/sounds/Win.wav";
 
 let ctx = null;
 let unlocked = false;
@@ -20,6 +21,7 @@ const SOUND = {
   miss: { url: missSound, vol: 0.8 },
   bust: { url: bustSound, vol: 1.0 },
   activated: { url: activatedSound, vol: 0.6 },
+  win: { url: winSound, vol: 0.9 },
 };
 
 function ensureCtx() {
@@ -126,6 +128,7 @@ export const sfxTick = () => playKey("tick");
 export const sfxBull = () => playKey("bull");
 export const sfxMiss = () => playKey("miss");
 export const sfxActivated = () => playKey("activated");
+export const sfxWin = () => playKey("win", { interrupt: false });
 export function sfxBust() {
   muteUntil = Date.now() + 500;
   playKey("bust", { ignoreMute: true, interrupt: true });
