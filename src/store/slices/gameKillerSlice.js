@@ -16,8 +16,31 @@ import {
 
 export const gameKillerSlice = (set, get) => ({
   startGameKiller(names, numbers, options = {}) {
+    const cleanNames = (names || [])
+      .map((n) => (n || "").trim())
+      .filter(Boolean);
+    const cleanNumbers = (numbers || [])
+      .map((x) => (x === "" || x == null ? null : Number(x)))
+      .filter((x) => Number.isFinite(x));
+
+    if (cleanNames.length < 2) {
+      console.warn("Killer requires at least 2 players");
+      return;
+    }
+
+    if (cleanNumbers.length !== cleanNames.length) {
+      console.warn("Killer requires a target number for each player");
+      return;
+    }
+
+    const dupes = cleanNumbers.filter((n, i) => cleanNumbers.indexOf(n) !== i);
+    if (dupes.length) {
+      console.warn("Killer requires unique target numbers", dupes);
+      return;
+    }
+
     const { doubleIn = false, selfKill = true } = options;
-    const players = makeKillerPlayers(names, numbers, doubleIn);
+    const players = makeKillerPlayers(cleanNames, cleanNumbers, doubleIn);
     set({
       players,
       scores: Object.fromEntries(players.map((p) => [p.id, 0])),
@@ -65,7 +88,7 @@ export const gameKillerSlice = (set, get) => ({
       p.id,
       dartIndex,
       p.lives,
-      false
+      false,
     );
     let currentThrows = [...(s.currentThrows || []), { value, mult }];
 
@@ -85,7 +108,7 @@ export const gameKillerSlice = (set, get) => ({
         p.id,
         dartIndex,
         p.lives,
-        true
+        true,
       );
       players = applyOwnHit(players, p.id, amt, rules);
     } else if (p.lives >= LIVES_MAX && value) {
@@ -96,7 +119,7 @@ export const gameKillerSlice = (set, get) => ({
         amt,
         finishTimes,
         lastDamagedBy,
-        kills
+        kills,
       );
       players = res.players;
       kills = res.kills;
@@ -154,7 +177,7 @@ export const gameKillerSlice = (set, get) => ({
       };
       if (flags.startedAtMinusOne && !flags.hitOwn) {
         players = players.map((pl) =>
-          pl.id === p.id ? { ...pl, lives: LIVES_MIN, isKiller: false } : pl
+          pl.id === p.id ? { ...pl, lives: LIVES_MIN, isKiller: false } : pl,
         );
         if (!finishTimes[p.id]) finishTimes[p.id] = Date.now();
         eliminationLog.push({

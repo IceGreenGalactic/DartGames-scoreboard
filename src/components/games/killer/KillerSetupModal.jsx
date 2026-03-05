@@ -28,9 +28,21 @@ export function KillerSetupModal({ isOpen, onClose, onConfirm }) {
     }
   }, [isOpen, selected]);
 
+  const minPlayersOk = selected.length >= 2;
+
   const allChosen =
     numbers.length === selected.length &&
     numbers.every((n) => n && n >= 1 && n <= 20);
+
+  const uniqueNumbersOk =
+    allChosen && new Set(numbers.map((n) => Number(n))).size === numbers.length;
+
+  const canStart = minPlayersOk && allChosen && uniqueNumbersOk;
+
+  let errorText = "";
+  if (!minPlayersOk) errorText = "Killer requires at least 2 players.";
+  else if (allChosen && !uniqueNumbersOk)
+    errorText = "Each player must have a unique number.";
 
   if (!isOpen) return null;
 
@@ -59,6 +71,10 @@ export function KillerSetupModal({ isOpen, onClose, onConfirm }) {
           ))}
         </Section>
 
+        {errorText && (
+          <div style={{ marginTop: 8, opacity: 0.9 }}>{errorText}</div>
+        )}
+
         <ToggleRow>
           <ToggleInput
             id="doubleIn"
@@ -85,7 +101,7 @@ export function KillerSetupModal({ isOpen, onClose, onConfirm }) {
           </button>
           <button
             className="btn btn-success"
-            disabled={!allChosen}
+            disabled={!canStart}
             onClick={() =>
               onConfirm(selected, numbers, {
                 doubleIn,
