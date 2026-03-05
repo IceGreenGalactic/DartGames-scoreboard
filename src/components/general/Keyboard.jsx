@@ -1,6 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { FaBullseye, FaUndo, FaBan } from "react-icons/fa";
 import { Grid, Key, ActionsRow, Wrap } from "./Keyboard.styled";
+import { useGameStore } from "../../store";
+import {
+  sfxPrime,
+  sfxTick,
+  sfxBull,
+  sfxMiss,
+  sfxActivated,
+  sfxBust,
+  sfxUnlock,
+  ttsUnlock,
+} from "../../store/lib/sfx";
 
 export function Keyboard({
   onThrow,
@@ -13,10 +24,16 @@ export function Keyboard({
   const [modifier, setModifier] = useState(1);
   const [bustFlash, setBustFlash] = useState(false);
   const clickGuardAt = useRef(0);
+  const primedRef = useRef(false);
+
+  const inputLockUntil = useGameStore((s) => s.inputLockUntil || 0);
+
   const numbers = Array.from({ length: 20 }, (_, i) => i + 1);
 
   useEffect(() => {
     if (!bustTick) return;
+    sfxBust();
+
     setBustFlash(true);
     const t = setTimeout(() => setBustFlash(false), 2050);
     return () => clearTimeout(t);
@@ -24,19 +41,41 @@ export function Keyboard({
 
   function guard(fn) {
     if (disabled) return;
+
     const now = Date.now();
+    if (now < inputLockUntil) return;
+
+    sfxUnlock();
+    ttsUnlock();
+
+    if (!primedRef.current) {
+      primedRef.current = true;
+      sfxPrime().catch(() => {});
+    }
+
     if (now - clickGuardAt.current < 160) return;
     clickGuardAt.current = now;
+
     fn();
   }
 
   function toggleModifier(next) {
-    setModifier((m) => (m === next ? 1 : next));
+    guard(() => {
+      setModifier((m) => {
+        const newM = m === next ? 1 : next;
+
+        if ((newM === 2 || newM === 3) && newM !== m) {
+          sfxActivated();
+        }
+        return newM;
+      });
+    });
   }
 
   function sendNumber(n) {
     guard(() => {
       if (isDisabled?.(n, modifier)) return;
+      sfxTick();
       onThrow({ value: n, mult: modifier });
       setModifier(1);
     });
@@ -46,6 +85,7 @@ export function Keyboard({
     guard(() => {
       if (isBullDisabled?.(modifier)) return;
       const mult = modifier === 3 ? 1 : modifier;
+      sfxBull();
       onThrow({ value: 25, mult });
       setModifier(1);
     });
@@ -53,6 +93,7 @@ export function Keyboard({
 
   function miss() {
     guard(() => {
+      sfxMiss();
       onThrow({ value: 0, mult: 1 });
       setModifier(1);
     });
@@ -77,6 +118,7 @@ export function Keyboard({
             </Key>
           );
         })}
+
         <Key
           data-variant="bull"
           disabled={disabled || (isBullDisabled?.(modifier) ?? false)}

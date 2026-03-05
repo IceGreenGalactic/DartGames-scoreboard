@@ -1,8 +1,9 @@
 import { Link } from "react-router-dom";
-import { useTitle } from "../hooks/useTitle";
+import { useTitle } from "../hooks/useTitle"; 
 import { useGameStore } from "../store";
 import { Wrap, Title, Lead, Actions, Stat, Row } from "./SetupPage.styled";
 import { ThemePicker } from "../components/general/ThemePicker";
+import { VoicePicker } from "../components/general/VoicePicker";
 
 export function SetupPage() {
   useTitle("DartGames • Setup");
@@ -18,7 +19,9 @@ export function SetupPage() {
       <Row>
         <ThemePicker />
       </Row>
-
+      <Row>
+        <VoicePicker />
+      </Row>
       <Actions>
         <button
           className="btn btn-primary"

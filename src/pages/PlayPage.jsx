@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { useTitle } from "../hooks/useTitle";
 import { games } from "../constants/games";
@@ -24,11 +24,14 @@ import { useGameStore } from "../store";
 import { rulesByGame } from "../components/rules";
 import { WinnerModal } from "../components/general/WinnerModal";
 import { buildResults, formatResultMeta } from "../store/lib/results";
+import TurnScoreAnnouncer from "../components/general/TurnScoreAnnouncer";
+import { sfxWin, sfxUnlock } from "../store/lib/sfx";
 
 export function PlayPage() {
   const { gameId } = useParams();
   const nav = useNavigate();
   const [showKillerSetup, setShowKillerSetup] = useState(false);
+  const [winnerModalOpen, setWinnerModalOpen] = useState(false);
 
   useTitle(gameId);
 
@@ -76,6 +79,7 @@ export function PlayPage() {
   if ((!players.length || gameType !== gameId) && !allowKillerSetupView) {
     return (
       <>
+        <TurnScoreAnnouncer enabledGames={["501", "301"]} />
         <Title>
           <h1>
             {games.find((g) => g.id === gameId)?.title ||
@@ -101,8 +105,8 @@ export function PlayPage() {
       ? podium.length + 1
       : podium.length
     : winnerId
-    ? 1
-    : 0;
+      ? 1
+      : 0;
   const currentPlace = decidedCount;
   const nextPlace = currentPlace + 1;
   const remainingAfterWinner = players.length - decidedCount;
@@ -125,8 +129,59 @@ export function PlayPage() {
     cricketMarks,
   });
 
+  const prevStatus = useRef(status);
+
+  useEffect(() => {
+    const was = prevStatus.current;
+    prevStatus.current = status;
+
+    if (status !== "win_pending") {
+      setWinnerModalOpen(false);
+      return;
+    }
+
+    if (was === "win_pending") return;
+
+    let cancelled = false;
+
+    const waitForTtsToFinish = () =>
+      new Promise((resolve) => {
+        const synth = window.speechSynthesis;
+        if (!synth) return resolve();
+
+        const start = Date.now();
+        const maxMs = 1500;
+
+        const tick = () => {
+          if (cancelled) return;
+          if (!synth.speaking && !synth.pending) return resolve();
+          if (Date.now() - start > maxMs) return resolve();
+          setTimeout(tick, 30);
+        };
+
+        tick();
+      });
+
+    (async () => {
+      await waitForTtsToFinish();
+      if (cancelled) return;
+
+      sfxUnlock();
+      sfxWin();
+
+      setTimeout(() => {
+        if (!cancelled) setWinnerModalOpen(true);
+      }, 60);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [status]);
+
   return (
     <>
+      <TurnScoreAnnouncer enabledGames={["501", "301"]} />
       <Title>
         <div>
           <h1>
@@ -187,6 +242,7 @@ export function PlayPage() {
           podium={podium}
         />
       )}
+
       {reserveHint && (
         <HintArea>
           {showHint && (
@@ -257,7 +313,7 @@ export function PlayPage() {
       )}
 
       <WinnerModal
-        open={status === "win_pending"}
+        open={winnerModalOpen}
         winnerName={winner?.name ?? "-"}
         currentPlace={currentPlace}
         nextPlace={nextPlace}
@@ -283,6 +339,7 @@ export function PlayPage() {
           }}
         />
       )}
+
       {(gameId === "501" || gameId === "301") && (
         <DoubleOutSwitch className="form-check form-switch">
           <input
